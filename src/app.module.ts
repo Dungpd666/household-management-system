@@ -8,9 +8,13 @@ import typeormConfig from './config/typeorm.config';
 import { HouseholdModule } from './household/household.module';
 import { PersonModule } from './person/person.module';
 import { ContributionModule } from './contribution/contribution.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 
 @Module({
+  controllers: [AppController],
+  providers: [AppService],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
