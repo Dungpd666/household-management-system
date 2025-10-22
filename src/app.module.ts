@@ -8,6 +8,8 @@ import typeormConfig from './config/typeorm.config';
 import { HouseholdModule } from './household/household.module';
 import { PersonModule } from './person/person.module';
 import { ContributionModule } from './contribution/contribution.module';
+import { UsersController } from './users/users.controller';
+import { UsersModule } from './users/users.module';
 
 
 @Module({
@@ -27,6 +29,9 @@ import { ContributionModule } from './contribution/contribution.module';
     HouseholdModule,
     PersonModule,
     ContributionModule,
+    UsersModule,
   ],
+  controllers: [UsersController],
+  providers: [],
 })
 export class AppModule {}
