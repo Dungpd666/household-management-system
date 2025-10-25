@@ -1,25 +1,41 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Person } from '../person/person.entity';
 
-@Entity()
+@Entity('households')
 export class Household {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
-  @Column()
+  @Column({ name: 'household_code' })
   householdCode: string; // Mã hộ khẩu
 
-  @Column()
+  @Column({ name: 'address' })
   address: string;
 
-  @Column()
+  @Column({ name: 'ward' })
   ward: string; // Phường/xã
 
-  @Column()
+  @Column({ name: 'district' })
   district: string;
 
-  @Column()
+  @Column({ name: 'city' })
   city: string;
+
+  @Column({ name: 'household_type' })
+  householdType: string;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 
   @OneToMany(() => Person, (person) => person.household)
   members: Person[];
