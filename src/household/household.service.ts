@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Household } from './household.entity';
 import { Person } from '../person/person.entity';
+import { CreateHouseholdDto } from './dto/create-household.dto';
+import { UpdateHouseholdDto } from './dto/update-household.dto';
 
 @Injectable()
 export class HouseholdService {
@@ -13,9 +15,9 @@ export class HouseholdService {
     @InjectRepository(Person)
     private personRepo: Repository<Person>,
   ) {}
-  async create(data: Partial<Household>) {
+  async create(data: CreateHouseholdDto) {
     const household = this.householdRepo.create(data);
-    return this.householdRepo.save(household);
+    return await this.householdRepo.save(household);
   }
 
   async findAll() {
@@ -23,19 +25,26 @@ export class HouseholdService {
   }
 
   async findOne(id: number) {
-    return this.householdRepo.findOne({
+    const household = await this.householdRepo.findOne({
       where: { id },
       relations: ['members'],
     });
+    if (!household) {
+      throw new NotFoundException(`Household not found`);
+    }
+    return household;
   }
 
-  async update(id: number, data: Partial<Household>) {
+  async update(id: number, data: UpdateHouseholdDto) {
     await this.householdRepo.update(id, data);
     return this.findOne(id);
   }
 
   async remove(id: number) {
-    await this.householdRepo.delete(id);
-    return { deleted: true };
+    const result = await this.householdRepo.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Household not found`);
+    }
+    return { deleted: true, id };
   }
 }

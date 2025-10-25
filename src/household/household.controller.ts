@@ -1,13 +1,22 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+} from '@nestjs/common';
 import { HouseholdService } from './household.service';
-import { Household } from './household.entity';
+import { CreateHouseholdDto } from './dto/create-household.dto';
+import { UpdateHouseholdDto } from './dto/update-household.dto';
 
 @Controller('household')
 export class HouseholdController {
   constructor(private readonly householdService: HouseholdService) {}
 
   @Post()
-  create(@Body() data: Partial<Household>) {
+  create(@Body() data: CreateHouseholdDto) {
     return this.householdService.create(data);
   }
 
@@ -22,7 +31,7 @@ export class HouseholdController {
   }
 
   @Put(':id')
-  update(@Param('id') id: number, @Body() data: Partial<Household>) {
+  update(@Param('id') id: number, @Body() data: UpdateHouseholdDto) {
     return this.householdService.update(id, data);
   }
 
