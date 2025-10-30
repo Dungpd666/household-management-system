@@ -1,34 +1,34 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity("users")
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ name: 'full_name' })
   full_name: string;
 
-  @Column({ unique: true })
+  @Column({ name: 'username', unique: true })
   username: string;
 
-  @Column()
+  @Column({ name: 'password_hash' })
   password_hash: string;
 
-  @Column({ unique: true })
+  @Column({ name: 'email', unique: true })
   email: string;
 
-  @Column({ unique: true })
+  @Column({ name: 'phone', unique: true })
   phone: string;
   
-  @Column()
+  @Column({ name: 'role' })
   role: string; // "admin", "superadmin"
 
-  @Column({ default: true })
+  @Column({ name: 'is_active', default: true })
   is_active: boolean;
 
-  @Column()
+  @Column({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 
-  @Column()
+  @Column({ name: 'updated_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updated_at: Date;
 }

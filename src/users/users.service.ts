@@ -15,12 +15,11 @@ export class UsersService {
         return this.usersRepository.save(user);
     }
     async findAllUsers() {
-        return this.usersRepository.find({ relations: ['Users'] });
+        return this.usersRepository.find();
     }
     async findUserById(id: number) {
         return this.usersRepository.findOne({
             where: { id },
-            relations: ['Users'],
         });
     }
     async updateUser(id: number, data: Partial<User>) {
@@ -33,3 +32,4 @@ export class UsersService {
         return { deleted: true };
     }
 }
+

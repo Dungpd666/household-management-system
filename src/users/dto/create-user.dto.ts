@@ -18,9 +18,8 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty({ message: 'Mật khẩu không được để trống' })
   @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
-  password_hash: string; // Client sẽ gửi password, server sẽ hash nó
+  password_hash: string;
 
-  
 
   @IsString()
   @IsNotEmpty()
