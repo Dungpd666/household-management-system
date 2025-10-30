@@ -6,13 +6,13 @@ export class User {
   id: number;
 
   @Column({ name: 'full_name' })
-  full_name: string;
+  fullName: string;
 
   @Column({ name: 'username', unique: true })
-  username: string;
+  userName: string;
 
   @Column({ name: 'password_hash' })
-  password_hash: string;
+  passWordHash: string;
 
   @Column({ name: 'email', unique: true })
   email: string;
@@ -24,11 +24,11 @@ export class User {
   role: string; // "admin", "superadmin"
 
   @Column({ name: 'is_active', default: true })
-  is_active: boolean;
+  isActive: boolean;
 
   @Column({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  created_at: Date;
+  createdAt: Date;
 
   @Column({ name: 'updated_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  updated_at: Date;
+  updatedAt: Date;
 }

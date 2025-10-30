@@ -11,17 +11,17 @@ export class UsersController {
         return this.usersService.findAllUsers();
     }
     
-    @Get(":id")
-    async findUserById(@Param('id') id : number){
-        return this.usersService.findUserById(id);
-    }
-    
     @Post()
     async CreateUser(@Body() dto: CreateUserDto){
         return this.usersService.createUser(dto, dto.role);
     }
 
-    @Put("update/:id")
+    @Get(":id")
+    async findUserById(@Param('id') id : number){
+        return this.usersService.findUserById(id);
+    }
+
+    @Put(":id")
     async UpdateUser(@Body() dto: CreateUserDto, @Param('id') id : number){
         return this.usersService.updateUser(id, dto);
     }
