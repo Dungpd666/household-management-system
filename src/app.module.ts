@@ -15,8 +15,6 @@ import { UsersModule } from './users/users.module';
 
 
 @Module({
-  controllers: [AppController],
-  providers: [AppService],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
