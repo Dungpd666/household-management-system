@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Person } from './person.entity';
@@ -10,7 +10,7 @@ export class PersonService {
   constructor(
     @InjectRepository(Person)
     private personRepo: Repository<Person>,
-  ) {}
+  ) { }
 
   async create(dto: CreatePersonDto) {
     const person = this.personRepo.create({
@@ -25,13 +25,20 @@ export class PersonService {
   }
 
   async findOne(id: number) {
-    return this.personRepo.findOne({
+    const person = await this.personRepo.findOne({
       where: { id },
-      relations: ['household'],
+      relations: ['household'],    // khi lấy thì lấy thêm cả household kh thì nos sẽ là undefined
     });
+
+    if(!person) {
+      throw new NotFoundException('Person with ID =  ' + id + ' not found ' );
+    }
+
+    return person ;
   }
 
   async update(id: number, dto: UpdatePersonDto) {
+    const person = await this.findOne(id); 
     await this.personRepo.update(id, {
       ...dto,
       household: dto.householdId ? { id: dto.householdId } as any : undefined,
@@ -40,7 +47,8 @@ export class PersonService {
   }
 
   async remove(id: number) {
-    await this.personRepo.delete(id);
+    const person = await this.findOne(id);  // trả ra lỗi nếu xóa kh đúng id 
+    await this.personRepo.remove(person);
     return { deleted: true };
   }
 }
