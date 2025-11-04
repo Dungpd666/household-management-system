@@ -28,6 +28,8 @@ export class Household {
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updatedAt: Date;
+
+  
   @OneToMany(() => Person, (person) => person.household)
   members: Person[];
 }

@@ -1,34 +1,46 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { PersonService } from './person.service';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
+import { ParseIdPipe } from './pipes/parse-id-pipe';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Controller('person')
 export class PersonController {
-  constructor(private readonly personService: PersonService) {}
+  constructor(private readonly personService: PersonService) { }
 
+  @UsePipes(new ValidationPipe())
   @Post()
   create(@Body() dto: CreatePersonDto) {
     return this.personService.create(dto);
   }
 
-  @Get()
-  findAll() {
-    return this.personService.findAll();
+   @Get()
+  findAll(@Query() paginaionDto : PaginationDto) {
+    return this.personService.findAll(paginaionDto);
   }
-
+ 
+  @Get('search')
+  findOneByIdentificationNumber(@Query('identificationNumber') identificationNumber: string) {
+    if (identificationNumber) {
+      return this.personService.findOneByIdentificationNumber(
+        identificationNumber
+      );
+    }
+    
+  }
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.personService.findOne(id);
   }
 
   @Put(':id')
-  update(@Param('id') id: number, @Body() dto: UpdatePersonDto) {
+  update(@Param('id', ParseIdPipe) id: number, @Body() dto: UpdatePersonDto) {
     return this.personService.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number) {
+  remove(@Param('id',ParseIdPipe) id: number) {
     return this.personService.remove(id);
   }
 }
