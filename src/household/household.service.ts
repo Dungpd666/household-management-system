@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { In } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Household } from './household.entity';
@@ -33,6 +34,17 @@ export class HouseholdService {
       throw new NotFoundException(`Household not found`);
     }
     return household;
+  }
+
+  async findByIds(ids: number[]) {
+    const households = await this.householdRepo.find({
+      where: { id: In(ids) },
+      relations: ['members'],
+    });
+    if (households.length === 0) {
+      throw new NotFoundException(`Households not found`);
+    }
+    return households;
   }
 
   async update(id: number, data: UpdateHouseholdDto) {

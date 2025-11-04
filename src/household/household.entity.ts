@@ -1,12 +1,20 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+
 import { Person } from '../person/person.entity';
+import { Contribution } from 'src/contribution/contribution.entity';
 
 @Entity('households')
 export class Household {
   @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
-
-  @Column()
+  @Column({ name: 'household_code' })
   householdCode: string; // Mã hộ khẩu
 
   @Column({ name: 'address' })
@@ -24,15 +32,6 @@ export class Household {
   @Column({ name: 'household_type' })
   householdType: string;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
-
-  @Column({ name: 'household_type' })
-  householdType: string;
-
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 
@@ -40,4 +39,7 @@ export class Household {
   updatedAt: Date;
   @OneToMany(() => Person, (person) => person.household)
   members: Person[];
+
+  @OneToMany(() => Contribution, (contribution) => contribution.household)
+  contributions: Contribution[];
 }
