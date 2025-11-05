@@ -99,5 +99,25 @@ export class PersonService {
     })
     return group;
   }
+
+  async genderGroup(){
+    const Gender =  await this.personRepo.find({
+      select : ['gender'],
+      relations : ['household']
+    })
+    const group = {
+      'male' : 0,
+      'female' : 0
+    }
+    Gender.forEach(sex => {
+      if (sex.gender ===  "male"){
+        group["male"] += 1;
+      }
+      else {
+        group["female"] += 1;
+      }
+    })
+    return group;
+  }
 }
 

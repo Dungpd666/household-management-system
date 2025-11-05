@@ -44,4 +44,9 @@ export class UsersController {
         return this.personService.jobGroup();
     }
 
+    @Get('/population/gender')
+    async genderGroup(){
+        return this.personService.genderGroup();
+    }
+
 }
