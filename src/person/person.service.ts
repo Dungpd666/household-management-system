@@ -7,7 +7,6 @@ import { UpdatePersonDto } from './dto/update-person.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { DEFAULT_PAGE_SIZE } from './utils/constants';
 
-
 @Injectable()
 export class PersonService {
   constructor(
@@ -28,7 +27,7 @@ export class PersonService {
   }
 
   async findAll(paginationDto: PaginationDto) {
-    
+
     return this.personRepo.find({
       relations: ['household'],
       skip: paginationDto.skip  ,
@@ -86,5 +85,64 @@ export class PersonService {
     }
 
     return person;
+  }
+
+
+  async ageGroup(){
+    const Population = await this.personRepo.find({
+      select: ['dateOfBirth'],
+      relations: ['household'],
+    });
+    const groups = {
+      '0-17': 0,
+      '18-35': 0,
+      '36-60': 0,
+      '60+': 0,
+    };
+    Population.forEach(element => {
+      const today = new Date();
+      const age = today.getFullYear() - element.dateOfBirth.getFullYear();
+      if (age < 18) groups['0-17']++;
+      else if (age <= 35) groups['18-35']++;
+      else if (age <= 60) groups['36-60']++;
+      else groups['60+']++;
+    });
+    return groups;
+  }
+
+  async jobGroup(){
+    const Jobs = await this.personRepo.find({
+      select: ['occupation'],
+      relations: ['household'],
+    });
+    const group = {};
+    Jobs.forEach(job => {
+      const job_name : string = job.occupation;
+      if (group[job_name] ==  null) { group[job_name] = 1; }
+      else {
+        group[job_name] += 1;
+      }
+    })
+    return group;
+  }
+
+  async genderGroup(){
+    const Gender =  await this.personRepo.find({
+      select : ['gender'],
+      relations : ['household']
+    })
+    const group = {
+      'male' : 0,
+      'female' : 0
+    }
+    Gender.forEach(sex => {
+      if (sex.gender ===  "male"){
+        group["male"] += 1;
+      }
+      else {
+        group["female"] += 1;
+      }
+    })
+    return group;
   }
 }

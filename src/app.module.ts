@@ -8,6 +8,8 @@ import typeormConfig from './config/typeorm.config';
 import { HouseholdModule } from './household/household.module';
 import { PersonModule } from './person/person.module';
 import { ContributionModule } from './contribution/contribution.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 
