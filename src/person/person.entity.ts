@@ -15,7 +15,7 @@ export class Person {
   @Column({name : 'gender'})
   gender: string;
 
-  @Column({name : 'identification_number'})
+  @Column({name : 'identification_number', unique : true})
   identificationNumber: string; // CMND/CCCD
 
   @Column({ nullable: true, name: 'relationship_with_head' })

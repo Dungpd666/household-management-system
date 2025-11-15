@@ -11,4 +11,6 @@ import { Person } from './person.entity';
   providers: [PersonService],
 
 })
-export class PersonModule {}
+export class PersonModule {
+  
+}
