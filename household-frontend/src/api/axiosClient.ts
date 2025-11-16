@@ -23,16 +23,34 @@ axiosClient.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle errors
+// Response interceptor to normalize errors for the UI
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
+    // Build a normalized error object so UI code can always read the same fields
+    const normalized = {
+      // network-level error (no response) like CORS, no connection, timeout
+      isNetworkError: !error.response,
+      // HTTP status if available
+      status: error.response?.status,
+      // Prefer server-provided message, fall back to axios message
+      message:
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        'Unknown error',
+      // any additional data from the server
+      data: error.response?.data,
+      // keep the original error for debugging when needed
+      originalError: error,
+    };
+
+    // Log for development; this keeps network/CORS errors visible
+    // eslint-disable-next-line no-console
+    console.error('API error:', normalized);
+
+    // Do NOT auto-redirect on 401 here. Let UI decide how to handle auth issues.
+    return Promise.reject(normalized);
   }
 );
 
