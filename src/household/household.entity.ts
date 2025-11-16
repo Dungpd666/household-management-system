@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 
 import { Person } from '../person/person.entity';
+import { Contribution } from '../contribution/contribution.entity';
 
 @Entity('households')
 export class Household {
@@ -40,4 +41,7 @@ export class Household {
 
   @OneToMany(() => Person, (person) => person.household)
   members: Person[];
+
+  @OneToMany(() => Contribution, (contribution) => contribution.household)
+  contributions: Contribution[];
 }

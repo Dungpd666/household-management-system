@@ -10,7 +10,6 @@ export default registerAs('typeorm', (): TypeOrmModuleOptions => ({
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   autoLoadEntities: true,
-  synchronize: false, // ❌ Tắt synchronize trong môi trường thực
-  migrationsRun: true, // ✅ chạy migration tự động khi app start
-  migrations: [join(__dirname, '../database/migrations/*{.ts,.js}')],
+  synchronize: true, // Enable auto schema sync for dev
+  logging: ['query', 'error'], // Log queries để debug
 }));
