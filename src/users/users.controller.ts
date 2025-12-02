@@ -45,7 +45,7 @@ export class UsersController {
     }
 
     @Get('/population/gender')
-    async genderGroup(){
+    async GenderGroup(){
         return this.personService.genderGroup();
     }
 
