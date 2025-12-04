@@ -22,7 +22,7 @@ export class CreateContributionDto {
   dueDate: string;
 
   @IsOptional()
-  @IsArray()
-  @ArrayNotEmpty()
-  householdIds: number[];
+  @IsNumber()
+  householdId: number;
 }
+

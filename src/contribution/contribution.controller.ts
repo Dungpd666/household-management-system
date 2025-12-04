@@ -52,9 +52,16 @@ export class ContributionController {
     return this.contributionService.update(id, dto);
   }
 
+  // Xóa đóng góp: admin/superadmin
+  @Post(':id/delete')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.contributionService.remove(id);
+  }
+
   // Cập nhật là đã thanh toán: admin/superadmin
   @Put(':id/pay')
   markPaid(@Param('id', ParseIntPipe) id: number, @Body() dto: MarkPaidDto) {
     return this.contributionService.markPaid(id, dto);
   }
 }
+
