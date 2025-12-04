@@ -12,6 +12,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
+import { PopulationEventModule } from './population-event/population-event.module';
 
 
 @Module({
@@ -32,6 +33,7 @@ import { UsersModule } from './users/users.module';
     PersonModule,
     ContributionModule,
     UsersModule,
+    PopulationEventModule,
   ],
   controllers: [UsersController],
   providers: [],
