@@ -8,9 +8,9 @@ import typeormConfig from './config/typeorm.config';
 import { HouseholdModule } from './household/household.module';
 import { PersonModule } from './person/person.module';
 import { ContributionModule } from './contribution/contribution.module';
+import { MulterModule } from '@nestjs/platform-express';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-
 
 @Module({
   controllers: [AppController],
@@ -19,6 +19,10 @@ import { AppService } from './app.service';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, typeormConfig],
+    }),
+
+    MulterModule.register({
+      dest: './uploads',
     }),
 
     TypeOrmModule.forRootAsync({

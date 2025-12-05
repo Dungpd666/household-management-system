@@ -4,8 +4,10 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { Person } from '../person/person.entity';
+import { Household } from '../household/household.entity';
 
 @Entity()
 export class Contribution {
@@ -23,4 +25,9 @@ export class Contribution {
 
   @ManyToOne(() => Person, (person) => person.id)
   person: Person;
+
+  @ManyToOne(() => Household, (h) => h.contributions, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'household_id' })
+  household: Household;
+
 }
