@@ -8,18 +8,22 @@ import typeormConfig from './config/typeorm.config';
 import { HouseholdModule } from './household/household.module';
 import { PersonModule } from './person/person.module';
 import { ContributionModule } from './contribution/contribution.module';
+import { MulterModule } from '@nestjs/platform-express';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 import { PopulationEventModule } from './population-event/population-event.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, typeormConfig],
+    }),
+
+    MulterModule.register({
+      dest: './uploads',
     }),
 
     TypeOrmModule.forRootAsync({

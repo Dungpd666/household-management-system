@@ -6,9 +6,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-
 import { Person } from '../person/person.entity';
-import { Contribution } from 'src/contribution/contribution.entity';
+import { Contribution } from '../contribution/contribution.entity';
 
 @Entity('households')
 export class Household {
