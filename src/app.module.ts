@@ -14,6 +14,8 @@ import { AppService } from './app.service';
 import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 import { PopulationEventModule } from './population-event/population-event.module';
+import { AuthModule } from './auth/auth.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -38,6 +40,8 @@ import { PopulationEventModule } from './population-event/population-event.modul
     ContributionModule,
     UsersModule,
     PopulationEventModule,
+    AuthModule,
+    RolesModule,
   ],
   controllers: [UsersController],
   providers: [],

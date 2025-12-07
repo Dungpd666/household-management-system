@@ -6,11 +6,14 @@ import {
   Body,
   Delete,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { PersonService } from '../person/person.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { PassportJwtGuard } from '../auth/guard/passport-jwt.guard';
 
+@UseGuards(PassportJwtGuard)
 @Controller('users')
 export class UsersController {
   constructor(
@@ -26,6 +29,18 @@ export class UsersController {
   @Post()
   async CreateUser(@Body() dto: CreateUserDto) {
     return this.usersService.createUser(dto, dto.role);
+  }
+
+  @Get('population')
+  async Statistic() {
+    const age = await this.personService.ageGroup();
+    const job = await this.personService.jobGroup();
+    const gender = await this.personService.genderGroup();
+    return {
+      Age: age,
+      Job: job,
+      Gender: gender,
+    };
   }
 
   @Get(':id')
