@@ -13,12 +13,15 @@ export default registerAs(
     database: process.env.DB_NAME,
 
     // 👇 THÊM ĐOẠN NÀY ĐỂ FIX LỖI NEON
-    ssl: true,
-    extra: {
-      ssl: {
-        rejectUnauthorized: false, // Giúp bỏ qua lỗi chứng chỉ nếu có
-      },
-    },
+    ssl: process.env.DB_SSL === 'true',
+    extra:
+      process.env.DB_SSL === 'true'
+        ? {
+            ssl: {
+              rejectUnauthorized: false,
+            },
+          }
+        : {},
     // 👆 HẾT PHẦN THÊM
 
     autoLoadEntities: true,
