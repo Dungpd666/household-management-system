@@ -31,8 +31,15 @@ export const UsersProvider = ({ children }: UsersProviderProps) => {
     try {
       const response = await usersApi.getAll();
       setUsers(response.data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch users');
+    } catch (err: any) {
+      const message = err?.message || 'Failed to fetch users';
+      // If backend returns 404/No users or 500 for empty, treat as empty list
+      if (err?.status === 404 || err?.status === 500) {
+        setUsers([]);
+        setError(null);
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -42,8 +49,9 @@ export const UsersProvider = ({ children }: UsersProviderProps) => {
     try {
       const response = await usersApi.getById(id);
       return response.data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch user');
+    } catch (err: any) {
+      const message = err?.message || 'Failed to fetch user';
+      setError(message);
       return null;
     }
   }, []);
@@ -53,29 +61,29 @@ export const UsersProvider = ({ children }: UsersProviderProps) => {
       const response = await usersApi.create(data);
       setUsers((prev) => [...prev, response.data]);
       return response.data;
-    } catch (err) {
-      throw err instanceof Error ? err : new Error('Failed to create user');
+    } catch (err: any) {
+      throw new Error(err?.message || 'Failed to create user');
     }
   }, []);
 
   const updateUser = useCallback(async (id: string, data: Partial<User>) => {
     try {
       const response = await usersApi.update(id, data);
-      setUsers((prev) =>
-        prev.map((user) => (user.id === id ? response.data : user))
-      );
+      const numericId = Number(id);
+      setUsers((prev) => prev.map((user) => (user.id === numericId ? response.data : user)));
       return response.data;
-    } catch (err) {
-      throw err instanceof Error ? err : new Error('Failed to update user');
+    } catch (err: any) {
+      throw new Error(err?.message || 'Failed to update user');
     }
   }, []);
 
   const deleteUser = useCallback(async (id: string) => {
     try {
       await usersApi.delete(id);
-      setUsers((prev) => prev.filter((user) => user.id !== id));
-    } catch (err) {
-      throw err instanceof Error ? err : new Error('Failed to delete user');
+      const numericId = Number(id);
+      setUsers((prev) => prev.filter((user) => user.id !== numericId));
+    } catch (err: any) {
+      throw new Error(err?.message || 'Failed to delete user');
     }
   }, []);
 

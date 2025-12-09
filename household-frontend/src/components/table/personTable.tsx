@@ -13,20 +13,20 @@ export const PersonTable = ({ persons, onEdit, onDelete, isLoading }: PersonTabl
       <table className="w-full">
         <thead className="bg-gray-100 border-b">
           <tr>
-            <th className="px-6 py-3 text-left text-sm font-medium">Name</th>
-            <th className="px-6 py-3 text-left text-sm font-medium">Email</th>
-            <th className="px-6 py-3 text-left text-sm font-medium">Phone</th>
-            <th className="px-6 py-3 text-left text-sm font-medium">Household ID</th>
+            <th className="px-6 py-3 text-left text-sm font-medium">Họ tên</th>
+            <th className="px-6 py-3 text-left text-sm font-medium">Số định danh</th>
+            <th className="px-6 py-3 text-left text-sm font-medium">Tình trạng</th>
+            <th className="px-6 py-3 text-left text-sm font-medium">Hộ khẩu</th>
             <th className="px-6 py-3 text-left text-sm font-medium">Actions</th>
           </tr>
         </thead>
         <tbody>
           {persons.map((person) => (
             <tr key={person.id} className="border-b hover:bg-gray-50">
-              <td className="px-6 py-3">{person.name}</td>
-              <td className="px-6 py-3">{person.email}</td>
-              <td className="px-6 py-3">{person.phone}</td>
-              <td className="px-6 py-3">{person.householdId}</td>
+              <td className="px-6 py-3">{person.fullName}</td>
+              <td className="px-6 py-3">{person.identificationNumber}</td>
+              <td className="px-6 py-3">{person.migrationStatus}</td>
+              <td className="px-6 py-3">{person.household?.householdCode || ''}</td>
               <td className="px-6 py-3 space-x-2">
                 <button
                   onClick={() => onEdit(person)}
@@ -35,7 +35,7 @@ export const PersonTable = ({ persons, onEdit, onDelete, isLoading }: PersonTabl
                   Edit
                 </button>
                 <button
-                  onClick={() => onDelete(person.id!)}
+                  onClick={() => onDelete(String(person.id!))}
                   disabled={isLoading}
                   className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 disabled:opacity-50"
                 >

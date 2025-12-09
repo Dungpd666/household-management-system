@@ -45,6 +45,15 @@ async function runTests() {
   console.log('🧪 Testing all endpoints...\n');
 
   try {
+    // Log helper for debug
+    const logResponse = (label, res) => {
+      console.log(`   Status: ${res.status}`);
+      if (res.status >= 400) {
+        console.log(`   Data: ${JSON.stringify(res.data, null, 2)}`);
+      } else {
+        console.log(`   Data: ${JSON.stringify(res.data, null, 2)}`);
+      }
+    };
     // 1. POST /household
     console.log('1️⃣  POST /household — Create household');
     const hhRes = await request('POST', '/household', {
@@ -65,11 +74,12 @@ async function runTests() {
 
     // 3. POST /person
     console.log('3️⃣  POST /person — Create person');
+    const uniqueId = String(Math.floor(Math.random() * 100000000)).padStart(9, '0');
     const personRes = await request('POST', '/person', {
       fullName: 'Nguyen Van A',
       dateOfBirth: '1990-01-01T00:00:00.000Z',
       gender: 'male',
-      identificationNumber: 'ID123456',
+      identificationNumber: uniqueId,
       relationshipWithHead: 'Head',
       householdId: hhId,
     });
@@ -84,14 +94,14 @@ async function runTests() {
     // 5. POST /contribution
     console.log('5️⃣  POST /contribution — Create contribution');
     const contRes = await request('POST', '/contribution', {
-      householdId: hhId,
       type: 'Monthly',
       amount: 100000,
       dueDate: '2025-11-30',
-      isPaid: false,
+      householdIds: [hhId],
     });
     console.log(`   Status: ${contRes.status} - ${JSON.stringify(contRes.data, null, 2)}\n`);
-    const contId = contRes.data.id;
+    const contId = Array.isArray(contRes.data) ? contRes.data[0]?.id : contRes.data?.id;
+    console.log(`   Extracted contId: ${contId}\n`);
 
     // 6. GET /contribution
     console.log('6️⃣  GET /contribution — List all contributions');
@@ -119,12 +129,15 @@ async function runTests() {
 
     // 10. POST /users
     console.log('🔟 POST /users — Create user');
+    const uniqueUsername = 'user' + Math.floor(Math.random() * 100000);
+    const uniqueEmail = `${uniqueUsername}@test${Math.floor(Math.random() * 1000)}.com`;
+    const uniquePhone = '+84' + String(Math.floor(Math.random() * 900000000) + 100000000); // +84 followed by 9 digits
     const userRes = await request('POST', '/users', {
       fullName: 'Admin User',
-      username: 'admin',
-      password: 'password123',
-      email: 'admin@test.com',
-      phone: '0123456789',
+      userName: uniqueUsername,
+      passWordHash: 'password123',
+      email: uniqueEmail,
+      phone: uniquePhone,
       role: 'admin',
     });
     console.log(`   Status: ${userRes.status} - ${JSON.stringify(userRes.data, null, 2)}\n`);

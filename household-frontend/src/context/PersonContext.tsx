@@ -49,31 +49,68 @@ export const PersonProvider = ({ children }: PersonProviderProps) => {
   }, []);
 
   const createPerson = useCallback(async (data: Omit<Person, 'id' | 'createdAt' | 'updatedAt'>) => {
+    // Normalize payload: convert date to ISO if string (date input), strip household wrapper
+    const payload: any = { ...data };
+    if (payload.dateOfBirth instanceof Date) {
+      payload.dateOfBirth = payload.dateOfBirth.toISOString();
+    }
+    if (typeof payload.dateOfBirth === 'string' && /\d{4}-\d{2}-\d{2}$/.test(payload.dateOfBirth)) {
+      // date-only from input -> ensure ISO
+      payload.dateOfBirth = new Date(payload.dateOfBirth).toISOString();
+    }
+    if (payload.household && payload.household.id) {
+      payload.householdId = payload.household.id;
+      delete payload.household;
+    }
+    if (payload.householdId === '' || payload.householdId === null) {
+      delete payload.householdId; // optional
+    }
     try {
-      const response = await personApi.create(data);
+      const response = await personApi.create(payload);
       setPersons((prev) => [...prev, response.data]);
       return response.data;
-    } catch (err) {
-      throw err instanceof Error ? err : new Error('Failed to create person');
+    } catch (err: any) {
+      // err may be normalized axios error object
+      if (err && err.message) {
+        throw new Error(err.message);
+      }
+      throw new Error('Failed to create person');
     }
   }, []);
 
   const updatePerson = useCallback(async (id: string, data: Partial<Person>) => {
+    const payload: any = { ...data };
+    if (payload.dateOfBirth instanceof Date) {
+      payload.dateOfBirth = payload.dateOfBirth.toISOString();
+    }
+    if (typeof payload.dateOfBirth === 'string' && /\d{4}-\d{2}-\d{2}$/.test(payload.dateOfBirth)) {
+      payload.dateOfBirth = new Date(payload.dateOfBirth).toISOString();
+    }
+    if (payload.household && payload.household.id) {
+      payload.householdId = payload.household.id;
+      delete payload.household;
+    }
+    if (payload.householdId === '' || payload.householdId === null) {
+      delete payload.householdId;
+    }
     try {
-      const response = await personApi.update(id, data);
-      setPersons((prev) =>
-        prev.map((person) => (person.id === id ? response.data : person))
-      );
+      const response = await personApi.update(id, payload);
+      const numericId = Number(id);
+      setPersons((prev) => prev.map((person) => (person.id === numericId ? response.data : person)));
       return response.data;
-    } catch (err) {
-      throw err instanceof Error ? err : new Error('Failed to update person');
+    } catch (err: any) {
+      if (err && err.message) {
+        throw new Error(err.message);
+      }
+      throw new Error('Failed to update person');
     }
   }, []);
 
   const deletePerson = useCallback(async (id: string) => {
     try {
       await personApi.delete(id);
-      setPersons((prev) => prev.filter((person) => person.id !== id));
+      const numericId = Number(id);
+      setPersons((prev) => prev.filter((person) => person.id !== numericId));
     } catch (err) {
       throw err instanceof Error ? err : new Error('Failed to delete person');
     }

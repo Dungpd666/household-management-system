@@ -17,9 +17,9 @@ export const usersApi = {
     return axiosClient.post('/users', data);
   },
 
-  // Update user
+  // Update user (backend uses PUT)
   update: (id: string, data: Partial<User>) => {
-    return axiosClient.patch(`/users/${id}`, data);
+    return axiosClient.put(`/users/${id}`, data);
   },
 
   // Delete user

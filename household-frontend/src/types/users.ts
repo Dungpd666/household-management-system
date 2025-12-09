@@ -1,12 +1,12 @@
 export interface User {
   id?: number;
-  full_name: string;
-  username: string;
+  fullName: string;
+  userName: string;
   email: string;
   phone: string;
-  password_hash?: string;
+  passWordHash?: string;
   role: string;
-  is_active?: boolean;
-  created_at?: Date;
-  updated_at?: Date;
+  isActive?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

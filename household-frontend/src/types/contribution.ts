@@ -2,7 +2,9 @@ export interface Contribution {
   id?: number;
   type: string;
   amount: number;
-  person?: { id: number; fullName: string };
-  personId?: number;
-  createdAt?: Date;
+  dueDate?: string | Date | null;
+  paid: boolean;
+  paidAt?: string | Date | null;
+  householdId: number;
+  createdAt?: string | Date;
 }

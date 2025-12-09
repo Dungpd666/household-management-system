@@ -10,6 +10,6 @@ export default registerAs('typeorm', (): TypeOrmModuleOptions => ({
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   autoLoadEntities: true,
-  synchronize: true, // Enable auto schema sync for dev
+  synchronize: false, // Enable auto schema sync for dev
   logging: ['query', 'error'], // Log queries để debug
 }));

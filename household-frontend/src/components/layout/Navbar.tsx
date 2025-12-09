@@ -2,14 +2,14 @@ import { Link } from 'react-router-dom';
 
 export const Navbar = () => {
   return (
-    <nav className="bg-white shadow-md">
-      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <div className="flex gap-6">
-          <Link to="/" className="font-semibold hover:text-blue-600">Dashboard</Link>
-          <Link to="/households" className="hover:text-blue-600">Households</Link>
-          <Link to="/persons" className="hover:text-blue-600">Persons</Link>
-          <Link to="/contributions" className="hover:text-blue-600">Contributions</Link>
-          <Link to="/users" className="hover:text-blue-600">Users</Link>
+    <nav className="bg-transparent">
+      <div className="px-6 py-4 flex justify-end items-center gap-4">
+        <input
+          className="hidden md:block w-72 text-[13px] bg-white/60 border border-border rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-purple/40"
+          placeholder="Tìm kiếm nhanh..."
+        />
+        <div className="w-9 h-9 rounded-full bg-brand-purple text-white flex items-center justify-center text-xs font-semibold shadow-card">
+          CB
         </div>
       </div>
     </nav>

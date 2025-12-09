@@ -45,7 +45,7 @@ export const PersonDetailPage = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">{person.name}</h1>
+        <h1 className="text-3xl font-bold">{person.fullName}</h1>
         <button
           onClick={handleDelete}
           className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"

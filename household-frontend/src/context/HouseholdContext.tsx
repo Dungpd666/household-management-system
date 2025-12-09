@@ -61,8 +61,9 @@ export const HouseholdProvider = ({ children }: HouseholdProviderProps) => {
   const updateHousehold = useCallback(async (id: string, data: Partial<Household>) => {
     try {
       const response = await householdApi.update(id, data);
+      const numericId = Number(id);
       setHouseholds((prev) =>
-        prev.map((household) => (household.id === id ? response.data : household))
+        prev.map((household) => (household.id === numericId ? response.data : household))
       );
       return response.data;
     } catch (err) {
@@ -73,7 +74,8 @@ export const HouseholdProvider = ({ children }: HouseholdProviderProps) => {
   const deleteHousehold = useCallback(async (id: string) => {
     try {
       await householdApi.delete(id);
-      setHouseholds((prev) => prev.filter((household) => household.id !== id));
+      const numericId = Number(id);
+      setHouseholds((prev) => prev.filter((household) => household.id !== numericId));
     } catch (err) {
       throw err instanceof Error ? err : new Error('Failed to delete household');
     }

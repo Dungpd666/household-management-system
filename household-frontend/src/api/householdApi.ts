@@ -17,9 +17,9 @@ export const householdApi = {
     return axiosClient.post('/household', data);
   },
 
-  // Update household
+  // Update household (backend uses PUT)
   update: (id: string, data: Partial<Household>) => {
-    return axiosClient.patch(`/household/${id}`, data);
+    return axiosClient.put(`/household/${id}`, data);
   },
 
   // Delete household

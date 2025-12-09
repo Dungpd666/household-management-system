@@ -9,9 +9,9 @@ interface ContributionContextType {
   error: string | null;
   fetchContributions: () => Promise<void>;
   fetchContributionById: (id: string) => Promise<Contribution | null>;
-  createContribution: (data: Omit<Contribution, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Contribution>;
+  createContribution: (data: { type: string; amount: number; dueDate?: string; householdIds: number[] }) => Promise<Contribution>;
   updateContribution: (id: string, data: Partial<Contribution>) => Promise<Contribution>;
-  deleteContribution: (id: string) => Promise<void>;
+  markPaid: (id: string, data?: { paidAt?: string }) => Promise<Contribution>;
 }
 
 export const ContributionContext = createContext<ContributionContextType | undefined>(undefined);
@@ -31,8 +31,14 @@ export const ContributionProvider = ({ children }: ContributionProviderProps) =>
     try {
       const response = await contributionApi.getAll();
       setContributions(response.data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch contributions');
+    } catch (err: any) {
+      const message = err?.message || 'Failed to fetch contributions';
+      if (err?.status === 404) {
+        setContributions([]);
+        setError(null);
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -42,13 +48,14 @@ export const ContributionProvider = ({ children }: ContributionProviderProps) =>
     try {
       const response = await contributionApi.getById(id);
       return response.data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch contribution');
+    } catch (err: any) {
+      const message = err?.message || 'Failed to fetch contribution';
+      setError(message);
       return null;
     }
   }, []);
 
-  const createContribution = useCallback(async (data: Omit<Contribution, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const createContribution = useCallback(async (data: { type: string; amount: number; dueDate?: string; householdIds: number[] }) => {
     try {
       const response = await contributionApi.create(data);
       setContributions((prev) => [...prev, response.data]);
@@ -61,21 +68,22 @@ export const ContributionProvider = ({ children }: ContributionProviderProps) =>
   const updateContribution = useCallback(async (id: string, data: Partial<Contribution>) => {
     try {
       const response = await contributionApi.update(id, data);
-      setContributions((prev) =>
-        prev.map((contribution) => (contribution.id === id ? response.data : contribution))
-      );
+      const numericId = Number(id);
+      setContributions((prev) => prev.map((c) => (c.id === numericId ? response.data : c)));
       return response.data;
     } catch (err) {
       throw err instanceof Error ? err : new Error('Failed to update contribution');
     }
   }, []);
 
-  const deleteContribution = useCallback(async (id: string) => {
+  const markPaid = useCallback(async (id: string, data?: { paidAt?: string }) => {
     try {
-      await contributionApi.delete(id);
-      setContributions((prev) => prev.filter((contribution) => contribution.id !== id));
+      const response = await contributionApi.markPaid(id, data || {});
+      const numericId = Number(id);
+      setContributions((prev) => prev.map((c) => (c.id === numericId ? response.data : c)));
+      return response.data;
     } catch (err) {
-      throw err instanceof Error ? err : new Error('Failed to delete contribution');
+      throw err instanceof Error ? err : new Error('Failed to mark contribution paid');
     }
   }, []);
 
@@ -89,7 +97,7 @@ export const ContributionProvider = ({ children }: ContributionProviderProps) =>
         fetchContributionById,
         createContribution,
         updateContribution,
-        deleteContribution,
+        markPaid,
       }}
     >
       {children}
