@@ -4,6 +4,7 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 import appConfig from './config/app.config';
 import typeormConfig from './config/typeorm.config';
+import vnpayConfig from './config/vnpay.config';
 
 import { HouseholdModule } from './household/household.module';
 import { PersonModule } from './person/person.module';
@@ -21,7 +22,7 @@ import { RolesModule } from './roles/roles.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, typeormConfig],
+      load: [appConfig, typeormConfig, vnpayConfig],
     }),
 
     MulterModule.register({
