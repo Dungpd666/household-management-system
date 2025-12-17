@@ -49,6 +49,18 @@ export class UsersService {
     }
   }
 
+  async findUserByUserName(userName: string) {
+    try {
+      const user = await this.usersRepository.findOne({ where: { userName } });
+      if (!user) {
+        throw new NotFoundException(`User with username ${userName} not found`);
+      }
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException('Error fetching user by username');
+    }
+  }
+
   async updateUser(id: number, data: Partial<User>) {
     try {
       const user = await this.usersRepository.findOne({ where: { id } });

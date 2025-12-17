@@ -57,7 +57,6 @@ export class PersonService {
     const updatePayload: any = { ...rest };
 
     if (householdId) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       updatePayload.household = { id: householdId };
     }
 
@@ -180,10 +179,10 @@ export class PersonService {
 
       person.gender = getValue(2) || '';
       person.identificationNumber = getValue(3) || '';
-      person.relationshipWithHead = getValue(4);
-      person.occupation = getValue(5);
-      person.educationLevel = getValue(6);
-      person.migrationStatus = getValue(7);
+      person.relationshipWithHead = getValue(4) || ' ';
+      person.occupation = getValue(5) || ' ';
+      person.educationLevel = getValue(6) || ' ';
+      person.migrationStatus = getValue(7) || ' ';
 
       const deadStr = getValue(8)?.toLowerCase();
       person.isDeceased = deadStr === 'true' || deadStr === '1';

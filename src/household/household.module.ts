@@ -9,5 +9,6 @@ import { HouseholdController } from './household.controller';
   imports: [TypeOrmModule.forFeature([Household, Person])],
   controllers: [HouseholdController],
   providers: [HouseholdService],
+  exports: [HouseholdService],
 })
 export class HouseholdModule {}

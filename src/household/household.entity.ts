@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
 import { Person } from '../person/person.entity';
 import { Contribution } from '../contribution/contribution.entity';
 
@@ -41,6 +42,6 @@ export class Household {
   @OneToMany(() => Person, (person) => person.household)
   members: Person[];
 
-  @OneToMany(() => Contribution, (contribution) => contribution.household)
+  @OneToMany(() => Contribution, (c) => c.household)
   contributions: Contribution[];
 }

@@ -26,20 +26,20 @@ export class Person {
   @Column({ name: 'identification_number', unique: true })
   identificationNumber: string; // CMND/CCCD
 
-  @Column({ type: 'varchar', nullable: true, name: 'relationship_with_head' })
-  relationshipWithHead: string | null;
+  @Column({ nullable: true, name: 'relationship_with_head' })
+  relationshipWithHead: string;
 
-  @Column({ type: 'varchar', nullable: true, name: 'occupation' })
-  occupation: string | null;
+  @Column({ nullable: true, name: 'occupation' })
+  occupation: string;
 
-  @Column({ type: 'varchar', nullable: true, name: 'education_level' })
-  educationLevel: string | null;
+  @Column({ nullable: true, name: 'education_level' })
+  educationLevel: string;
 
-  @Column({ type: 'varchar', nullable: true, name: 'migration_status' })
-  migrationStatus: string | null; // "Thường trú", "Tạm trú", v.v.
+  @Column({ nullable: true, name: 'migration_status' })
+  migrationStatus: string; // "Thường trú", "Tạm trú", v.v.
 
-  @Column({ type: 'varchar', nullable: true, name: 'is_deceased' })
-  isDeceased: boolean | null;
+  @Column({ nullable: true, name: 'is_deceased' })
+  isDeceased: boolean;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
