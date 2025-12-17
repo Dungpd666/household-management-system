@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -23,13 +24,25 @@ import { UploadCsvPipe } from './pipes/upload-csv-pipe';
 import { RoleEnum } from '../roles/roles.enum';
 import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
-import { AuthGuard } from '@nestjs/passport';
 import { PassportJwtGuard } from '../auth/guard/passport-jwt.guard';
+import express from 'express';
 
-@UseGuards(PassportJwtGuard, RolesGuard)
+//@UseGuards(PassportJwtGuard, RolesGuard)
 @Controller('person')
 export class PersonController {
   constructor(private readonly personService: PersonService) {}
+
+  //@Roles(RoleEnum.admin, RoleEnum.superadmin)
+  @Post('export-csv')
+  async exportCsv(@Res() res: express.Response) {
+    const csvData = await this.personService.exportToCsv();
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=persons_export.csv',
+    );
+    res.status(200).send(csvData);
+  }
 
   @Roles(RoleEnum.admin, RoleEnum.superadmin)
   @UsePipes(new ValidationPipe())
