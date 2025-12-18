@@ -11,6 +11,9 @@ import { ContributionModule } from './contribution/contribution.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { RolesModule } from './roles/roles.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   controllers: [AppController],
@@ -35,6 +38,9 @@ import { AppService } from './app.service';
     HouseholdModule,
     PersonModule,
     ContributionModule,
+    UsersModule,
+    AuthModule,
+    RolesModule,
   ],
 })
 export class AppModule {}
