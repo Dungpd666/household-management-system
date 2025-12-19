@@ -27,12 +27,12 @@ import { RolesGuard } from '../roles/roles.guard';
 import { PassportJwtGuard } from '../auth/guard/passport-jwt.guard';
 import express from 'express';
 
-//@UseGuards(PassportJwtGuard, RolesGuard)
+@UseGuards(PassportJwtGuard, RolesGuard)
 @Controller('person')
 export class PersonController {
   constructor(private readonly personService: PersonService) {}
 
-  //@Roles(RoleEnum.admin, RoleEnum.superadmin)
+  @Roles(RoleEnum.admin, RoleEnum.superadmin)
   @Post('export-csv')
   async exportCsv(@Res() res: express.Response) {
     const csvData = await this.personService.exportToCsv();
