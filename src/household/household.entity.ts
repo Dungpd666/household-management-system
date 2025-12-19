@@ -33,6 +33,12 @@ export class Household {
   @Column({ name: 'household_type' })
   householdType: string;
 
+  @Column({ name: 'password', type: 'varchar', nullable: true })
+  password: string | null;
+
+  @Column({ name: 'is_active', type: 'boolean', default: true })
+  isActive: boolean;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 

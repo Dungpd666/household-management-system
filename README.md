@@ -1,103 +1,174 @@
-<<<<<<< HEAD
-# household-management-system
-Project IT3180
-=======
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Household Management System
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+**Project IT3180**
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+A comprehensive backend system for managing household registration, resident information, contributions, and population events in a residential area. Built with NestJS, TypeORM, and PostgreSQL.
 
-## Description
+## Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Household Management**: Register and manage household information
+- **Resident Tracking**: Complete person/resident information system with CSV import
+- **Contribution Management**: Fee tracking with VNPay payment integration
+- **Population Events**: Track demographic changes (births, deaths, migrations)
+- **Authentication & Authorization**: JWT-based auth with role-based access control
+- **RESTful API**: Well-structured endpoints with validation
 
-## Project setup
+## Tech Stack
 
-```bash
-$ npm install
-```
+- **NestJS 11.x** - Progressive Node.js framework
+- **TypeScript** - Type-safe development
+- **PostgreSQL** - Relational database
+- **TypeORM** - Database ORM
+- **Passport & JWT** - Authentication
+- **VNPay** - Payment gateway integration
 
-## Compile and run the project
+## Quick Start
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL
+- npm or yarn
+
+### Installation
 
 ```bash
-# development
-$ npm run start
+# Install dependencies
+npm install
 
-# watch mode
-$ npm run start:dev
+# Configure environment
+cp .env.example .env
+# Edit .env with your configuration
 
-# production mode
-$ npm run start:prod
+# Run migrations
+npm run migration:run
+
+# Start development server
+npm run start:dev
 ```
 
-## Run tests
+The server will start at `http://localhost:3000` (or your configured port).
+
+## Available Scripts
 
 ```bash
-# unit tests
-$ npm run test
+# Development
+npm run start          # Start application
+npm run start:dev      # Start with watch mode
+npm run start:debug    # Start with debug mode
 
-# e2e tests
-$ npm run test:e2e
+# Building
+npm run build          # Build for production
+npm run start:prod     # Run production build
 
-# test coverage
-$ npm run test:cov
+# Testing
+npm run test           # Run unit tests
+npm run test:watch     # Run tests in watch mode
+npm run test:cov       # Run tests with coverage
+npm run test:e2e       # Run e2e tests
+
+# Code Quality
+npm run format         # Format code with Prettier
+npm run lint           # Lint and fix code
+
+# Database
+npm run migration:generate  # Generate migration
+npm run migration:run       # Run migrations
+npm run migration:revert    # Revert last migration
 ```
 
-## Deployment
+## Project Structure
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+```
+src/
+├── auth/              # Authentication & JWT
+├── users/             # User management
+├── household/         # Household management
+├── person/            # Resident information
+├── contribution/      # Fees & payments
+├── population-event/  # Demographic events
+├── roles/             # RBAC system
+└── config/            # App configuration
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Documentation
 
-## Resources
+For detailed documentation including:
+- Complete database schema
+- API endpoints
+- Authentication flow
+- Module descriptions
+- Development guidelines
 
-Check out a few resources that may come in handy when working with NestJS:
+See **[PROJECT_DOCUMENTATION.md](./PROJECT_DOCUMENTATION.md)**
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Environment Variables
 
-## Support
+Create a `.env` file based on `.env.example`:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```env
+# Application
+APP_PORT=3000
+APP_NAME=Household Management System
+APP_ENV=development
 
-## Stay in touch
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASS=your_password
+DB_NAME=household_db
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# Authentication
+JWT_SECRET=your_jwt_secret
+
+# VNPay Payment Gateway
+VNP_TMN_CODE=your_code
+VNP_HASH_SECRET=your_secret
+VNP_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+VNP_RETURN_URL=http://localhost:3000/contribution/vnpay-return
+TIME_LIMIT=15
+```
+
+## API Overview
+
+### Authentication
+- `POST /auth/login` - Login with credentials
+- `GET /auth/info` - Get current user info
+
+### Households
+- `GET /household` - List all households
+- `POST /household` - Create household
+- `GET /household/:id` - Get household details
+- `PATCH /household/:id` - Update household
+- `DELETE /household/:id` - Delete household
+
+### Persons
+- `GET /person` - List persons (paginated)
+- `POST /person` - Create person
+- `POST /person/upload-csv` - Bulk import from CSV
+- `GET /person/:id` - Get person details
+- `PATCH /person/:id` - Update person
+- `DELETE /person/:id` - Delete person
+
+### Contributions
+- `GET /contribution` - List contributions
+- `POST /contribution` - Create contribution
+- `PATCH /contribution/:id/mark-paid` - Mark as paid
+- `POST /contribution/:id/payment-url` - Generate VNPay payment URL
+
+### Population Events
+- `GET /population-event` - List events
+- `POST /population-event` - Create event
+- `GET /population-event/:id` - Get event details
+- `PATCH /population-event/:id` - Update event
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
->>>>>>> master
+UNLICENSED - Private project for IT3180
+
+## Resources
+
+- [NestJS Documentation](https://docs.nestjs.com)
+- [TypeORM Documentation](https://typeorm.io)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)

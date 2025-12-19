@@ -6,6 +6,7 @@ import { Household } from './household.entity';
 import { Person } from '../person/person.entity';
 import { CreateHouseholdDto } from './dto/create-household.dto';
 import { UpdateHouseholdDto } from './dto/update-household.dto';
+import { SetHouseholdPasswordDto } from './dto/set-household-password.dto';
 
 @Injectable()
 export class HouseholdService {
@@ -58,5 +59,64 @@ export class HouseholdService {
       throw new NotFoundException(`Household not found`);
     }
     return { deleted: true, id };
+  }
+
+  async findByHouseholdCode(householdCode: string): Promise<Household | null> {
+    return this.householdRepo.findOne({
+      where: { householdCode },
+    });
+  }
+
+  async setHouseholdPassword(
+    householdId: number,
+    setPasswordDto: SetHouseholdPasswordDto,
+  ): Promise<void> {
+    const household = await this.householdRepo.findOne({
+      where: { id: householdId },
+    });
+
+    if (!household) {
+      throw new NotFoundException('Household not found');
+    }
+
+    // Cập nhật mật khẩu (theo pattern hiện tại: không hash)
+    household.password = setPasswordDto.password;
+    household.isActive = true;
+
+    await this.householdRepo.save(household);
+  }
+
+  async findOneWithRelations(id: number): Promise<Household> {
+    const household = await this.householdRepo.findOne({
+      where: { id },
+      relations: ['members', 'contributions'],
+    });
+
+    if (!household) {
+      throw new NotFoundException('Household not found');
+    }
+
+    return household;
+  }
+
+  async validateHouseholdCredentials(
+    householdCode: string,
+    password: string,
+  ): Promise<Household | null> {
+    const household = await this.findByHouseholdCode(householdCode);
+
+    if (!household || !household.password) {
+      return null;
+    }
+
+    if (!household.isActive) {
+      return null;
+    }
+
+    if (household.password !== password) {
+      return null;
+    }
+
+    return household;
   }
 }
