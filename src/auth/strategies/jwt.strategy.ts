@@ -14,7 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  validate(payload: any) {
+  async validate(payload: any) {
     if (!payload) {
       throw new UnauthorizedException();
     }
@@ -22,6 +22,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       userID: payload.sub,
       userRole: payload.role,
       userName: payload.username,
+      userType: payload.userType,
+      householdCode: payload.householdCode,
     };
   }
 }
