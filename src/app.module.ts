@@ -1,22 +1,19 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-
 import appConfig from './config/app.config';
 import typeormConfig from './config/typeorm.config';
 import vnpayConfig from './config/vnpay.config';
-
 import { HouseholdModule } from './household/household.module';
 import { PersonModule } from './person/person.module';
 import { ContributionModule } from './contribution/contribution.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
-import { PopulationEventModule } from './population-event/population-event.module';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './auth/auth.module'
 import { RolesModule } from './roles/roles.module';
+import { PopulationEventModule } from './population-event/population-event.module';
 
 @Module({
   imports: [
@@ -44,7 +41,7 @@ import { RolesModule } from './roles/roles.module';
     AuthModule,
     RolesModule,
   ],
-  controllers: [UsersController],
-  providers: [],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

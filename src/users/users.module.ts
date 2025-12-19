@@ -5,7 +5,7 @@ import { UsersController } from './users.controller';
 import { User } from './users.entity';
 import { Person } from '../person/person.entity';
 import { PersonService } from '../person/person.service';
-import { JwtStrategy } from '../auth/strategies/jwt.strategy'
+import { JwtStrategy } from '../auth/strategies/jwt.strategy';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Person])],

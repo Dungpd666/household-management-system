@@ -2,8 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+} from '@nestjs/common';import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Person } from './person.entity';
 import { CreatePersonDto } from './dto/create-person.dto';
@@ -57,7 +56,6 @@ export class PersonService {
     const updatePayload: any = { ...rest };
 
     if (householdId) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       updatePayload.household = { id: householdId };
     }
 
@@ -116,7 +114,7 @@ export class PersonService {
     });
     const group = {};
     Jobs.forEach((job) => {
-      const job_name = job.occupation || '';
+      const job_name: string = job.occupation;
       if (group[job_name] == null) {
         group[job_name] = 1;
       } else {
@@ -144,6 +142,7 @@ export class PersonService {
     });
     return group;
   }
+
   async importFromCsv(buffer: Buffer) {
     const csvText = buffer.toString('utf8');
     // Tách dòng, xử lý cả xuống dòng Windows (\r\n) và Linux (\n)
@@ -180,10 +179,10 @@ export class PersonService {
 
       person.gender = getValue(2) || '';
       person.identificationNumber = getValue(3) || '';
-      person.relationshipWithHead = getValue(4);
-      person.occupation = getValue(5);
-      person.educationLevel = getValue(6);
-      person.migrationStatus = getValue(7);
+      person.relationshipWithHead = getValue(4) || ' ';
+      person.occupation = getValue(5) || ' ';
+      person.educationLevel = getValue(6) || ' ';
+      person.migrationStatus = getValue(7) || ' ';
 
       const deadStr = getValue(8)?.toLowerCase();
       person.isDeceased = deadStr === 'true' || deadStr === '1';
@@ -209,5 +208,46 @@ export class PersonService {
         'Lỗi lưu DB: Kiểm tra lại Unique CCCD hoặc ID Hộ.',
       );
     }
+  }
+
+  async exportToCsv(): Promise<string> {
+    const persons = await this.personRepo.find({ relations: ['household'] });
+    const header =
+      'ID,Full Name,Date of Birth,Gender,Identification Number,Relationship with Head,Occupation,Education Level,Migration Status,Is Deceased,Household ID,Household Address\n';
+
+    const rows = persons
+      .map((person) => {
+        const householdId = person.household ? person.household.id : '';
+        const householdAddress = person.household
+          ? person.household.address
+          : '';
+        // Dùng JSON.stringify để bao quanh các giá trị có thể chứa dấu phẩy bằng dấu ngoặc kép
+        return [
+          person.id,
+          person.fullName,
+          person.dateOfBirth.toISOString().split('T')[0], // Format YYYY-MM-DD
+          person.gender,
+          `\t${person.identificationNumber}`, // Thêm \t để Excel hiểu là Text
+          person.relationshipWithHead,
+          person.occupation,
+          person.educationLevel,
+          person.migrationStatus,
+          person.isDeceased,
+          householdId,
+          householdAddress,
+        ]
+          .map((value) => {
+            const strValue = String(value ?? ''); // Chuyển null/undefined thành chuỗi rỗng
+            if (strValue.includes(',')) {
+              return `"${strValue}"`; // Bao quanh bằng dấu ngoặc kép nếu có dấu phẩy
+            }
+            return strValue;
+          })
+          .join(',');
+      })
+      .join('\n');
+
+    // Thêm BOM (\uFEFF) vào đầu chuỗi để Excel nhận diện UTF-8
+    return '\uFEFF' + header + rows;
   }
 }
