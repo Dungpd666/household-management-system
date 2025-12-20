@@ -7,12 +7,15 @@ import {
   Param,
   Query,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { ContributionService } from './contribution.service';
 import { CreateContributionDto } from './dto/create-contribution.dto';
 import { UpdateContributionDto } from './dto/update-contribution.dto';
 import { MarkPaidDto } from './dto/mark-paid.dto';
+import { PassportJwtGuard } from '../auth/guard/passport-jwt.guard';
 
+@UseGuards(PassportJwtGuard)
 @Controller('contribution')
 export class ContributionController {
   constructor(private readonly contributionService: ContributionService) {}

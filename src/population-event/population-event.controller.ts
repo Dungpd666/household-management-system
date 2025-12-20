@@ -8,11 +8,14 @@ import {
   Param,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { PopulationEventService } from './population-event.service';
 import { CreatePopulationEventDto } from './dto/create-population-event.dto';
 import { UpdatePopulationEventDto } from './dto/update-population-event.dto';
+import { PassportJwtGuard } from '../auth/guard/passport-jwt.guard';
 
+@UseGuards(PassportJwtGuard)
 @Controller('population-event')
 export class PopulationEventController {
   constructor(
