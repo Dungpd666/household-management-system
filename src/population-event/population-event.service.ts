@@ -36,9 +36,14 @@ export class PopulationEventService {
   }
 
   async findAll() {
-    return this.populationEventRepo.find({
-      relations: ['person', 'handledBy'],
-    });
+    try {
+      return await this.populationEventRepo.find({
+        relations: ['person', 'handledBy'],
+      });
+    } catch (err) {
+      this.logger.error('Error in PopulationEventService.findAll', err?.stack || err);
+      throw err;
+    }
   }
 
   async findOne(id: number) {

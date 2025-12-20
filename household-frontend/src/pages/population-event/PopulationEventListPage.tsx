@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { usePopulationEvent } from '../../hooks/usePopulationEvent';
 import { usePerson } from '../../hooks/usePerson';
+import { useAuth } from '../../hooks/useAuth';
 import { PopulationEvent } from '../../api/populationEventApi';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
-import PageHeader from '../../components/layout/PageHeader';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { DataTable } from '../../components/ui/DataTable';
 import { useNavigate } from 'react-router-dom';
 
-export default function PopulationEventListPage() {
+export const PopulationEventListPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { events, loading, error, fetchEvents, createEvent, updateEvent, deleteEvent } = usePopulationEvent();
   const { persons } = usePerson();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -216,4 +218,4 @@ export default function PopulationEventListPage() {
       </Modal>
     </div>
   );
-}
+};

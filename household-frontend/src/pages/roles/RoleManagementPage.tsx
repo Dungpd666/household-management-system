@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useUsers } from '../../hooks/useUsers';
+import { useAuth } from '../../hooks/useAuth';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
-import PageHeader from '../../components/layout/PageHeader';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { DataTable } from '../../components/ui/DataTable';
 import { User } from '../../types/users';
 
-export default function RoleManagementPage() {
+export const RoleManagementPage = () => {
+  const { user } = useAuth();
   const { users, loading, error, fetchUsers, updateUser } = useUsers();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -163,4 +165,4 @@ export default function RoleManagementPage() {
       </Modal>
     </div>
   );
-}
+};

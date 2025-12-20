@@ -8,15 +8,12 @@ import {
   Param,
   UsePipes,
   ValidationPipe,
-  UseGuards,
+  Logger,
 } from '@nestjs/common';
 import { PopulationEventService } from './population-event.service';
 import { CreatePopulationEventDto } from './dto/create-population-event.dto';
 import { UpdatePopulationEventDto } from './dto/update-population-event.dto';
-import { PassportJwtGuard } from '../auth/guard/passport-jwt.guard';
-import { Logger } from '@nestjs/common';
 
-@UseGuards(PassportJwtGuard)
 @Controller('population-event')
 export class PopulationEventController {
   constructor(
@@ -33,10 +30,11 @@ export class PopulationEventController {
 
   @Get()
   async findAll() {
+    this.logger.log('findAll endpoint called');
     try {
       return await this.populationEventService.findAll();
     } catch (err) {
-      this.logger.error('Failed to fetch population events', err as any);
+      this.logger.error('Failed to fetch population events', err?.stack || err);
       throw err;
     }
   }

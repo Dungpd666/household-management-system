@@ -29,7 +29,7 @@ export default registerAs(
     // ⚠️ LƯU Ý QUAN TRỌNG VỚI DB MỚI (NEON):
     // Nếu đang chạy ở môi trường development (không phải production), bật `synchronize: true`
     // để TypeORM tự tạo bảng cho lần chạy đầu tiên. Ở production nên để `false` và dùng migrations.
-    synchronize: process.env.NODE_ENV === 'production' ? false : true,
+    synchronize: false, // DISABLE FOR NOW TO DEBUG ENDPOINT ERROR
 
     migrationsRun: true,
     migrations: [join(__dirname, '../database/migrations/*{.ts,.js}')],
