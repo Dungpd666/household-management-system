@@ -11,6 +11,7 @@ import {
 import { UsersService } from './users.service';
 import { PersonService } from '../person/person.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { PassportJwtGuard } from '../auth/guard/passport-jwt.guard';
 
 @UseGuards(PassportJwtGuard)
@@ -49,7 +50,7 @@ export class UsersController {
   }
 
   @Put(':id')
-  async UpdateUser(@Body() dto: CreateUserDto, @Param('id') id: number) {
+  async UpdateUser(@Body() dto: UpdateUserDto, @Param('id') id: number) {
     return this.usersService.updateUser(id, dto);
   }
 

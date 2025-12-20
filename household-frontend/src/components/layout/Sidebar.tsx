@@ -81,6 +81,16 @@ export const Sidebar = () => {
         <NavLink to="/contributions" className={({ isActive }) => navItemClass({ isActive })}>
           <Icon name="donate" /> <span>Đóng góp</span>
         </NavLink>
+        <NavLink to="/population-events" className={({ isActive }) => navItemClass({ isActive })}>
+          <Icon name="person" /> <span>Sự kiện dân số</span>
+        </NavLink>
+        
+        <div className="mt-4 mb-2 text-[11px] font-semibold opacity-60 text-white/60 uppercase">Hệ thống</div>
+        {(user?.userRole === 'superadmin' || user?.userRole === 'admin') && (
+          <NavLink to="/roles" className={({ isActive }) => navItemClass({ isActive })}>
+            <Icon name="users" /> <span>Phân quyền</span>
+          </NavLink>
+        )}
       </nav>
 
       {/* User info ngay dưới các chức năng */}

@@ -21,16 +21,31 @@ export class UsersService {
       user.role = role;
       return await this.usersRepository.save(user);
     } catch (error) {
-      throw new BadRequestException('Failed to create user: ' + error.message);
+      // Chuẩn hóa lỗi tạo người dùng sang tiếng Việt, đặc biệt cho lỗi trùng dữ liệu
+      if ((error as any)?.code === '23505') {
+        const detail: string = (error as any).detail || '';
+
+        if (detail.includes('(username)')) {
+          throw new BadRequestException('Tên đăng nhập đã tồn tại. Vui lòng chọn tên đăng nhập khác.');
+        }
+        if (detail.includes('(email)')) {
+          throw new BadRequestException('Email này đã được sử dụng. Vui lòng dùng một địa chỉ email khác.');
+        }
+        if (detail.includes('(phone)')) {
+          throw new BadRequestException('Số điện thoại này đã được sử dụng. Vui lòng dùng một số điện thoại khác.');
+        }
+
+        throw new BadRequestException('Thông tin người dùng bị trùng. Vui lòng kiểm tra lại tên đăng nhập, email và số điện thoại.');
+      }
+
+      throw new BadRequestException('Không thể tạo người dùng mới. Vui lòng thử lại sau hoặc liên hệ quản trị viên.');
     }
   }
 
   async findAllUsers() {
     try {
+      // Trả về tất cả người dùng đang có trong DB (kể cả các bản ghi cũ)
       const users = await this.usersRepository.find();
-      if (!users.length) {
-        throw new NotFoundException('No users found');
-      }
       return users;
     } catch (error) {
       throw new InternalServerErrorException('Failed to fetch users');
@@ -39,7 +54,7 @@ export class UsersService {
 
   async findUserById(id: number) {
     try {
-      const user = await this.usersRepository.findOne({ where: { id } });
+      const user = await this.usersRepository.findOne({ where: { id, isActive: true } });
       if (!user) {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
@@ -51,13 +66,11 @@ export class UsersService {
 
   async findUserByUserName(userName: string) {
     try {
+      // Dùng cho đăng nhập: tìm theo username, không ném lỗi 500 khi không tồn tại
       const user = await this.usersRepository.findOne({ where: { userName } });
-      if (!user) {
-        throw new NotFoundException(`User with username ${userName} not found`);
-      }
-      return user;
+      return user && user.isActive ? user : null;
     } catch (error) {
-      throw new InternalServerErrorException('Error fetching user by username');
+      throw new InternalServerErrorException('Error fetching user by username (service)');
     }
   }
 
@@ -71,25 +84,35 @@ export class UsersService {
       await this.usersRepository.update(id, data);
       return await this.usersRepository.findOne({ where: { id } });
     } catch (error) {
-      throw new BadRequestException('Failed to update user: ' + error.message);
+      // Chuẩn hóa lỗi cập nhật người dùng sang tiếng Việt, đặc biệt cho lỗi trùng dữ liệu
+      if ((error as any)?.code === '23505') {
+        const detail: string = (error as any).detail || '';
+
+        if (detail.includes('(username)')) {
+          throw new BadRequestException('Tên đăng nhập đã tồn tại. Vui lòng chọn tên đăng nhập khác.');
+        }
+        if (detail.includes('(email)')) {
+          throw new BadRequestException('Email này đã được sử dụng. Vui lòng dùng một địa chỉ email khác.');
+        }
+        if (detail.includes('(phone)')) {
+          throw new BadRequestException('Số điện thoại này đã được sử dụng. Vui lòng dùng một số điện thoại khác.');
+        }
+
+        throw new BadRequestException('Thông tin người dùng bị trùng. Vui lòng kiểm tra lại tên đăng nhập, email và số điện thoại.');
+      }
+
+      throw new BadRequestException('Không thể cập nhật người dùng. Vui lòng thử lại sau hoặc liên hệ quản trị viên.');
     }
   }
 
   async removeUser(id: number) {
     try {
-      const user = await this.usersRepository.findOne({
-        where: { id, isActive: true },
-      });
-      if (!user) {
+      const result = await this.usersRepository.delete(id);
+      if (result.affected === 0) {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
 
-      await this.usersRepository
-        .createQueryBuilder('user')
-        .update(User)
-        .set({ isActive: false })
-        .execute();
-      return { deleted: true };
+      return { deleted: true, id };
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('Failed to delete user');

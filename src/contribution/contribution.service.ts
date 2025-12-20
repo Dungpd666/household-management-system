@@ -23,16 +23,24 @@ export class ContributionService {
     private readonly householdService: HouseholdService,
   ) {}
 
-  // Tạo đóng góp
   async create(createDto: CreateContributionDto) {
-    await this.householdService.findOne(createDto.householdId); // Kiểm tra hộ gia đình tồn tại
-    const c = this.repo.create({
-      ...createDto,
+    const householdId = createDto.householdId;
+    if (!householdId) {
+      throw new ForbiddenException('Must provide householdId');
+    }
+
+    // Đảm bảo hộ gia đình tồn tại
+    const household = await this.householdService.findOne(householdId);
+
+    const contribution = this.repo.create({
+      type: createDto.type,
+      amount: createDto.amount,
       dueDate: createDto.dueDate ? new Date(createDto.dueDate) : null,
       paid: false,
-      paidAt: null,
+      householdId: household.id,
     });
-    return await this.repo.save(c);
+
+    return this.repo.save(contribution);
   }
 
   // Lấy danh sách đóng góp với bộ lọc theo hộ gia đình
@@ -83,14 +91,6 @@ export class ContributionService {
     return saved;
   }
 
-  // Xóa đóng góp
-  async remove(id: number) {
-    const c = await this.findById(id);
-    if (!c) throw new NotFoundException('Contribution not found');
-    await this.repo.remove(c);
-    return { deleted: true };
-  }
-
   // Lấy thông tin để phân tích
   async getStatistics() {
     const total = await this.repo.count();
@@ -107,5 +107,13 @@ export class ContributionService {
       totalAmount: Number(totalAmountRaw?.sum ?? 0),
     };
   }
-}
 
+  // Xóa khoản đóng góp
+  async remove(id: number) {
+    const result = await this.repo.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException('Contribution not found');
+    }
+    return { deleted: true, id };
+  }
+}

@@ -12,13 +12,16 @@ export default registerAs(
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
 
-    // 👇 THÊM ĐOẠN NÀY ĐỂ FIX LỖI NEON
-    ssl: true,
-    extra: {
-      ssl: {
-        rejectUnauthorized: false, // Giúp bỏ qua lỗi chứng chỉ nếu có
-      },
-    },
+    // 👇 THÊM ĐOẠN NÀY ĐỂ FIX LỖI NEON (bật qua biến môi trường DB_SSL=true)
+    ssl: process.env.DB_SSL === 'true',
+    extra:
+      process.env.DB_SSL === 'true'
+        ? {
+            ssl: {
+              rejectUnauthorized: false, // Giúp bỏ qua lỗi chứng chỉ nếu có
+            },
+          }
+        : undefined,
     // 👆 HẾT PHẦN THÊM
 
     autoLoadEntities: true,

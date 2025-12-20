@@ -5,6 +5,7 @@ import { PersonProvider } from '../context/PersonContext';
 import { HouseholdProvider } from '../context/HouseholdContext';
 import { ContributionProvider } from '../context/ContributionContext';
 import { UsersProvider } from '../context/UsersContext';
+import { PopulationEventProvider } from '../context/PopulationEventContext';
 import { Header } from '../components/layout/Header';
 import { Sidebar } from '../components/layout/Sidebar';
 import { Card } from '../components/ui/Card';
@@ -20,6 +21,8 @@ import { UsersListPage } from '../pages/users/UsersListPage';
 import { ProfilePage } from '../pages/profile/ProfilePage';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { ProtectedRoute } from './ProtectedRoute';
+import { PopulationEventListPage } from '../pages/population-event/PopulationEventListPage';
+import { RoleManagementPage } from '../pages/roles/RoleManagementPage';
 import { useAuth } from '../hooks/useAuth';
 import { useUsers } from '../hooks/useUsers';
 import { Button } from '../components/ui/Button';
@@ -383,7 +386,8 @@ export const AppRoutes = () => {
         <PersonProvider>
           <HouseholdProvider>
             <ContributionProvider>
-              <UsersProvider>
+              <PopulationEventProvider>
+                <UsersProvider>
                 <div className="min-h-screen app-shell flex">
                   {/* Sidebar full height, kéo theo toàn bộ chiều cao nội dung */}
                   <div className="hidden md:block w-60 xl:w-64 bg-slate-950 text-white">
@@ -478,6 +482,26 @@ export const AppRoutes = () => {
                         )}
                       />
                       
+                      {/* Population Events Routes (protected) */}
+                      <Route
+                        path="/population-events"
+                        element={(
+                          <ProtectedRoute>
+                            <PopulationEventListPage />
+                          </ProtectedRoute>
+                        )}
+                      />
+                      
+                      {/* Role Management Routes (admin only) */}
+                      <Route
+                        path="/roles"
+                        element={(
+                          <ProtectedRoute requiredRole="admin">
+                            <RoleManagementPage />
+                          </ProtectedRoute>
+                        )}
+                      />
+                      
                       {/* Users Routes (protected) - vẫn giữ cho xem danh sách chi tiết nếu cần */}
                       <Route
                         path="/users"
@@ -507,6 +531,7 @@ export const AppRoutes = () => {
                   </div>
                 </div>
               </UsersProvider>
+              </PopulationEventProvider>
             </ContributionProvider>
           </HouseholdProvider>
         </PersonProvider>
