@@ -27,10 +27,9 @@ export default registerAs(
     autoLoadEntities: true,
 
     // ⚠️ LƯU Ý QUAN TRỌNG VỚI DB MỚI (NEON):
-    // Vì DB trên Neon đang trống trơn, nếu bạn để synchronize: false
-    // và chưa có file migration nào trong folder, thì app sẽ chạy nhưng KHÔNG có bảng nào được tạo.
-    // Lần đầu chạy, bạn nên để true, hoặc chắc chắn rằng folder migrations đã có file.
-    synchronize: false,
+    // Nếu đang chạy ở môi trường development (không phải production), bật `synchronize: true`
+    // để TypeORM tự tạo bảng cho lần chạy đầu tiên. Ở production nên để `false` và dùng migrations.
+    synchronize: process.env.NODE_ENV === 'production' ? false : true,
 
     migrationsRun: true,
     migrations: [join(__dirname, '../database/migrations/*{.ts,.js}')],
