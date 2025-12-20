@@ -14,11 +14,13 @@ import { CreateContributionDto } from './dto/create-contribution.dto';
 import { UpdateContributionDto } from './dto/update-contribution.dto';
 import { MarkPaidDto } from './dto/mark-paid.dto';
 import { PassportJwtGuard } from '../auth/guard/passport-jwt.guard';
+import { Logger } from '@nestjs/common';
 
 @UseGuards(PassportJwtGuard)
 @Controller('contribution')
 export class ContributionController {
   constructor(private readonly contributionService: ContributionService) {}
+  private readonly logger = new Logger(ContributionController.name);
 
   // Tạm thời chưa có xác thực và phân quyền
   // Tạo khoản đóng góp: admin/superadmin
@@ -29,9 +31,13 @@ export class ContributionController {
 
   // Lấy danh sách đóng góp với bộ lọc: admin/superadmin/user(riêng với user lọc chỉ lấy đóng góp của user)
   @Get()
-  async findAll(@Query('householdId') householdId?: string) {
-    const hid = householdId ? Number(householdId) : undefined;
-    return this.contributionService.findAll(hid);
+  async getAll(@Query('page', ParseIntPipe) page = 1) {
+    try {
+      return await this.contributionService.findAll(page);
+    } catch (err) {
+      this.logger.error('Failed to fetch contributions', err as any);
+      throw err;
+    }
   }
 
   // Lấy dữ liệu thống kê: admin/superadmin

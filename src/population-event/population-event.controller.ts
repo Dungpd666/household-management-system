@@ -14,6 +14,7 @@ import { PopulationEventService } from './population-event.service';
 import { CreatePopulationEventDto } from './dto/create-population-event.dto';
 import { UpdatePopulationEventDto } from './dto/update-population-event.dto';
 import { PassportJwtGuard } from '../auth/guard/passport-jwt.guard';
+import { Logger } from '@nestjs/common';
 
 @UseGuards(PassportJwtGuard)
 @Controller('population-event')
@@ -22,6 +23,8 @@ export class PopulationEventController {
     private readonly populationEventService: PopulationEventService,
   ) {}
 
+  private readonly logger = new Logger(PopulationEventController.name);
+
   @UsePipes(new ValidationPipe())
   @Post()
   create(@Body() dto: CreatePopulationEventDto) {
@@ -29,8 +32,13 @@ export class PopulationEventController {
   }
 
   @Get()
-  findAll() {
-    return this.populationEventService.findAll();
+  async findAll() {
+    try {
+      return await this.populationEventService.findAll();
+    } catch (err) {
+      this.logger.error('Failed to fetch population events', err as any);
+      throw err;
+    }
   }
 
   @Get(':id')
