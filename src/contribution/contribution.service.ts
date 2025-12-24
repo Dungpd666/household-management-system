@@ -31,14 +31,20 @@ export class ContributionService {
 
   // Tạo đóng góp
   async create(createDto: CreateContributionDto) {
-    await this.householdService.findOne(createDto.householdId); // Kiểm tra hộ gia đình tồn tại
-    const c = this.repo.create({
-      ...createDto,
-      dueDate: createDto.dueDate ? new Date(createDto.dueDate) : null,
-      paid: false,
-      paidAt: null,
-    });
-    return await this.repo.save(c);
+    const contributions: Contribution[] = [];
+    for (const householdId of createDto.householdIds) {
+      await this.householdService.findOne(householdId);
+      const c = this.repo.create({
+        ...createDto,
+        dueDate: createDto.dueDate ? new Date(createDto.dueDate) : null,
+        paid: false,
+        paidAt: null,
+        householdId: householdId,
+      });
+      await this.repo.save(c);
+      contributions.push(c);
+    }
+    return contributions;
   }
 
   // Lấy danh sách đóng góp với bộ lọc theo hộ gia đình
