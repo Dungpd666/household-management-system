@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { RoleEnum } from '../roles/roles.enum';
 import { Household } from '../household/household.entity';
 import { HouseholdService } from '../household/household.service';
+import * as bcrypt from 'bcrypt';
 
 type AuthInput = { username: string; password: string };
 type signInData = { userID: number; userRole: string; userName: string };
@@ -36,9 +37,8 @@ export class AuthService {
     async validateUser(input: AuthInput): Promise<signInData | null> {
         const user = await this.usersService.findUserByUserName(input.username);
         if (user) {
-            const passWordHash = input.password;
-            // no encrypted
-            if(user.passWordHash === passWordHash ){
+            const isPasswordValid = await bcrypt.compare(input.password, user.passWordHash);
+            if(isPasswordValid ){
                 return {
                     userID: user.id,
                     userRole: user.role,
