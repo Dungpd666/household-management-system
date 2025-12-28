@@ -8,16 +8,18 @@ import {
   Query,
   ParseIntPipe,
   Ip,
+  Req,
 } from '@nestjs/common';
 import { ContributionService } from './contribution.service';
 import { CreateContributionDto } from './dto/create-contribution.dto';
 import { UpdateContributionDto } from './dto/update-contribution.dto';
 import { MarkPaidDto } from './dto/mark-paid.dto';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
-import { UseGuards, Request } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { Roles } from 'src/roles/roles.decorator';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { RoleEnum } from 'src/roles/roles.enum';
+import type { Request } from 'express';
 
 @Controller('contribution')
 export class ContributionController {
@@ -47,10 +49,7 @@ export class ContributionController {
   @Roles(RoleEnum.admin, RoleEnum.superadmin, RoleEnum.household)
   @UseGuards(AuthGuard, RolesGuard)
   @Get()
-  async findAll(
-    @Query('householdId') householdId?: string,
-    @Request() req?: any,
-  ) {
+  async findAll(@Query('householdId') householdId?: string, @Req() req?: any) {
     const user = req?.user;
     // Nếu là user bình thường, chỉ được xem đóng góp của hộ gia đình mình
     if (user && user.userRole === RoleEnum.household) {

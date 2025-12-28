@@ -20,7 +20,7 @@ type HouseholdAuthResult = {
   householdID: number;
   householdCode: string;
   address: string;
-}
+};
 
 @Injectable()
 export class AuthService {
@@ -77,7 +77,9 @@ export class AuthService {
     return this.signInHousehold(householdData);
   }
 
-  async validateHousehold(input: HouseholdAuthInput): Promise<Household | null> {
+  async validateHousehold(
+    input: HouseholdAuthInput,
+  ): Promise<Household | null> {
     return await this.householdService.validateHouseholdCredentials(
       input.householdCode,
       input.password,

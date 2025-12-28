@@ -74,4 +74,3 @@ export class PopulationEventService {
     return { deleted: true };
   }
 }
-
