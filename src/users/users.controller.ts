@@ -3,8 +3,12 @@ import { UsersService } from './users.service';
 import { PersonService } from '../person/person.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PassportJwtGuard } from '../auth/guard/passport-jwt.guard'
+import { Roles } from 'src/roles/roles.decorator';
+import { RoleEnum } from 'src/roles/roles.enum';
+import { RolesGuard } from 'src/roles/roles.guard';
 
-@UseGuards(PassportJwtGuard)
+@Roles(RoleEnum.superadmin)
+@UseGuards(PassportJwtGuard, RolesGuard)
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersService: UsersService, 
@@ -21,6 +25,7 @@ export class UsersController {
         return this.usersService.createUser(dto, dto.role);
     }
     
+    @Roles(RoleEnum.admin)
     @Get('population')
     async Statistic(){
         const age = await this.personService.ageGroup();
@@ -32,12 +37,11 @@ export class UsersController {
             "Gender": gender
         };
     }
-
     @Get(':id')
     async findUserById(@Param('id') id : number){
         return this.usersService.findUserById(id);
     }
-
+    
     @Put(':id')
     async UpdateUser(@Body() dto: CreateUserDto, @Param('id') id : number){
         return this.usersService.updateUser(id, dto);
