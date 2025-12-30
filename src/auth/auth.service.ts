@@ -29,7 +29,7 @@ export class AuthService {
     async authentication (input: AuthInput){
         const userData = await this.validateUser(input);
         if(!userData ){
-            throw new UnauthorizedException(); 
+            throw new UnauthorizedException();
         }
         return this.signIn(userData);
     }
@@ -57,7 +57,7 @@ export class AuthService {
         };
         const accessToken = await this.jwtService.signAsync(tokenPayLoad);
         return {
-            accessToken: accessToken, 
+            accessToken: accessToken,
             userID: userData.userID,
             userRole: userData.userRole,
             userName: userData.userName

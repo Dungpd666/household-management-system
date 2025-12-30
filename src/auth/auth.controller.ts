@@ -9,6 +9,7 @@ import { HouseholdLocalGuard } from './guard/household-local.guard';
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
   @HttpCode(HttpStatus.OK)
   @UseGuards(PassportLocalGuard)
   @Post('login')

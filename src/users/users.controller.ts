@@ -1,10 +1,19 @@
-import { Controller, Get, Param, Post, Body, Delete, Put, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Body,
+  Delete,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { PersonService } from '../person/person.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { PassportJwtGuard } from '../auth/guard/passport-jwt.guard'
-import { RoleEnum } from '../roles/roles.enum';
+import { PassportJwtGuard } from '../auth/guard/passport-jwt.guard';
 import { Roles } from '../roles/roles.decorator';
+import { RoleEnum } from '../roles/roles.enum';
 import { RolesGuard } from '../roles/roles.guard';
 
 @UseGuards(PassportJwtGuard, RolesGuard)
@@ -32,7 +41,7 @@ export class UsersController {
   async Statistic() {
     const age = await this.personService.ageGroup();
     const job = await this.personService.jobGroup();
-    const gender = await this.personService.jobGroup();
+    const gender = await this.personService.genderGroup();
     return {
       Age: age,
       Job: job,

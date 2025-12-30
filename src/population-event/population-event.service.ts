@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PopulationEvent } from './population-event.entity';
@@ -8,8 +8,6 @@ import { Person } from '../person/person.entity';
 
 @Injectable()
 export class PopulationEventService {
-  private readonly logger = new Logger(PopulationEventService.name);
-
   constructor(
     @InjectRepository(PopulationEvent)
     private populationEventRepo: Repository<PopulationEvent>,
@@ -74,4 +72,3 @@ export class PopulationEventService {
     return { deleted: true };
   }
 }
-
