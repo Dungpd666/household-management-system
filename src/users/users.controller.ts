@@ -1,4 +1,13 @@
-import { Controller, Get, Param, Post, Body, Delete, Put, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Body,
+  Delete,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { PersonService } from '../person/person.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -11,9 +20,10 @@ import { RolesGuard } from 'src/roles/roles.guard';
 @UseGuards(PassportJwtGuard, RolesGuard)
 @Controller('users')
 export class UsersController {
-    constructor(private readonly usersService: UsersService, 
-                private readonly personService : PersonService
-    ) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly personService: PersonService,
+  ) {}
 
     @Get()
     async findAllUsers() {

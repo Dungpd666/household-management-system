@@ -20,10 +20,9 @@ export class CreateUserDto {
   @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
   passWordHash: string;
 
-
   @IsString()
   @IsNotEmpty()
-  role : string //"admin", "superadmin"
+  role: string; //"admin", "superadmin"
 
   @IsEmail({}, { message: 'Email không hợp lệ' })
   @IsNotEmpty({ message: 'Email không được để trống' })
@@ -32,5 +31,4 @@ export class CreateUserDto {
   @IsPhoneNumber('VN', { message: 'Số điện thoại không hợp lệ' })
   @IsNotEmpty({ message: 'Số điện thoại không được để trống' })
   phone: string;
-
 }

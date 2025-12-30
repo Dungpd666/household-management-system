@@ -6,7 +6,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-
 import { Person } from '../person/person.entity';
 import { Contribution } from '../contribution/contribution.entity';
 
@@ -33,6 +32,12 @@ export class Household {
   @Column({ name: 'household_type' })
   householdType: string;
 
+  @Column({ name: 'password', type: 'varchar', nullable: true })
+  password: string | null;
+
+  @Column({ name: 'is_active', type: 'boolean', default: true })
+  isActive: boolean;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 
@@ -42,6 +47,6 @@ export class Household {
   @OneToMany(() => Person, (person) => person.household)
   members: Person[];
 
-  @OneToMany(() => Contribution, (c) => c.household)
+  @OneToMany(() => Contribution, (contribution) => contribution.household)
   contributions: Contribution[];
 }
