@@ -27,7 +27,19 @@ export class UsersService {
 
   async findAllUsers() {
     try {
-      const users = await this.usersRepository.find();
+      const users = await this.usersRepository.find({
+        select: [
+          'id',
+          'fullName',
+          'userName',
+          'email',
+          'phone',
+          'role',
+          'isActive',
+          'createdAt',
+          'updatedAt',
+        ],
+      });
       if (!users.length) {
         throw new NotFoundException('No users found');
       }
@@ -39,7 +51,20 @@ export class UsersService {
 
   async findUserById(id: number) {
     try {
-      const user = await this.usersRepository.findOne({ where: { id } });
+      const user = await this.usersRepository.findOne({
+        where: { id },
+        select: [
+          'id',
+          'fullName',
+          'userName',
+          'email',
+          'phone',
+          'role',
+          'isActive',
+          'createdAt',
+          'updatedAt',
+        ],
+      });
       if (!user) {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
@@ -51,7 +76,46 @@ export class UsersService {
 
   async findUserByUserName(userName: string) {
     try {
-      const user = await this.usersRepository.findOne({ where: { userName } });
+      const user = await this.usersRepository.findOne({
+        where: { userName },
+        select: [
+          'id',
+          'fullName',
+          'userName',
+          'email',
+          'phone',
+          'role',
+          'isActive',
+          'createdAt',
+          'updatedAt',
+        ],
+      });
+      if (!user) {
+        throw new NotFoundException(`User with username ${userName} not found`);
+      }
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException('Error fetching user by username');
+    }
+  }
+
+  async findUserWithPasswordByUserName(userName: string) {
+    try {
+      const user = await this.usersRepository.findOne({
+        where: { userName },
+        select: [
+          'id',
+          'fullName',
+          'userName',
+          'passWordHash',
+          'email',
+          'phone',
+          'role',
+          'isActive',
+          'createdAt',
+          'updatedAt',
+        ],
+      });
       if (!user) {
         throw new NotFoundException(`User with username ${userName} not found`);
       }
@@ -69,7 +133,20 @@ export class UsersService {
       }
 
       await this.usersRepository.update(id, data);
-      return await this.usersRepository.findOne({ where: { id } });
+      return await this.usersRepository.findOne({
+        where: { id },
+        select: [
+          'id',
+          'fullName',
+          'userName',
+          'email',
+          'phone',
+          'role',
+          'isActive',
+          'createdAt',
+          'updatedAt',
+        ],
+      });
     } catch (error) {
       throw new BadRequestException('Failed to update user: ' + error.message);
     }

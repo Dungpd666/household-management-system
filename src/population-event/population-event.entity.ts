@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { Person } from '../person/person.entity';
 import { User } from 'src/users/users.entity';
+import { PopulationEventType } from './dto/create-population-event.dto';
 
 @Entity('population_events')
 export class PopulationEvent {
@@ -14,12 +15,12 @@ export class PopulationEvent {
   id: number;
 
   @Column()
-  type: string;
+  type: PopulationEventType;
 
   @Column({ type: 'text', nullable: true })
   description?: string;
 
-  @Column({ name: 'event_date', type: 'date' })
+  @Column({ name: 'event_date', type: 'date', default: () => 'CURRENT_DATE' })
   eventDate: string;
 
   @ManyToOne(() => Person, (person) => person.populationEvents, {

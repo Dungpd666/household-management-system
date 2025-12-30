@@ -8,7 +8,12 @@ import * as bcrypt from 'bcrypt';
 
 type AuthInput = { username: string; password: string };
 type signInData = { userID: number; userRole: string; userName: string };
-type AuthResult = { accessToken: string; userID: number; userRole: string; userName: string }
+type AuthResult = {
+  accessToken: string;
+  userID: number;
+  userRole: string;
+  userName: string;
+};
 
 type HouseholdAuthInput = { householdCode: string; password: string };
 type HouseholdAuthResult = {
@@ -16,53 +21,58 @@ type HouseholdAuthResult = {
   householdID: number;
   householdCode: string;
   address: string;
-}
+};
 
 @Injectable()
 export class AuthService {
-    constructor (
-        private usersService: UsersService,
-        private householdService: HouseholdService,
-        private jwtService: JwtService
-    ) {}
+  constructor(
+    private usersService: UsersService,
+    private householdService: HouseholdService,
+    private jwtService: JwtService,
+  ) {}
 
-    async authentication (input: AuthInput){
-        const userData = await this.validateUser(input);
-        if(!userData ){
-            throw new UnauthorizedException();
-        }
-        return this.signIn(userData);
+  async authentication(input: AuthInput) {
+    const userData = await this.validateUser(input);
+    if (!userData) {
+      throw new UnauthorizedException();
     }
+    return this.signIn(userData);
+  }
 
-    async validateUser(input: AuthInput): Promise<signInData | null> {
-        const user = await this.usersService.findUserByUserName(input.username);
-        if (user) {
-            const isPasswordValid = await bcrypt.compare(input.password, user.passWordHash);
-            if(isPasswordValid ){
-                return {
-                    userID: user.id,
-                    userRole: user.role,
-                    userName: user.userName
-                }
-            }
-        }
-        return null;
-    }
-
-    async signIn(userData: signInData): Promise<AuthResult | null> {
-        const tokenPayLoad = {
-            role: userData.userRole,
-            sub: userData.userID,
-            username: userData.userName
-        };
-        const accessToken = await this.jwtService.signAsync(tokenPayLoad);
+  async validateUser(input: AuthInput): Promise<signInData | null> {
+    const user = await this.usersService.findUserWithPasswordByUserName(
+      input.username,
+    );
+    if (user) {
+      const isPasswordValid = await bcrypt.compare(
+        input.password,
+        user.passWordHash,
+      );
+      if (isPasswordValid) {
         return {
-            accessToken: accessToken,
-            userID: userData.userID,
-            userRole: userData.userRole,
-            userName: userData.userName
+          userID: user.id,
+          userRole: user.role,
+          userName: user.userName,
         };
+      }
     }
+    return null;
+  }
+
+  async signIn(userData: signInData): Promise<AuthResult | null> {
+    const tokenPayLoad = {
+      role: userData.userRole,
+      sub: userData.userID,
+      username: userData.userName,
+    };
+    const accessToken = await this.jwtService.signAsync(tokenPayLoad);
+    return {
+      accessToken: accessToken,
+      userID: userData.userID,
+      userRole: userData.userRole,
+      userName: userData.userName,
+    };
+  }
 
   async householdAuthentication(input: HouseholdAuthInput) {
     const householdData = await this.validateHousehold(input);
@@ -72,7 +82,9 @@ export class AuthService {
     return this.signInHousehold(householdData);
   }
 
-  async validateHousehold(input: HouseholdAuthInput): Promise<Household | null> {
+  async validateHousehold(
+    input: HouseholdAuthInput,
+  ): Promise<Household | null> {
     return await this.householdService.validateHouseholdCredentials(
       input.householdCode,
       input.password,
