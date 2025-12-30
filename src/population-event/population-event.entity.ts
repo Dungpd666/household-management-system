@@ -39,4 +39,3 @@ export class PopulationEvent {
   })
   createdAt: Date;
 }
-

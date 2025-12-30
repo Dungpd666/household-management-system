@@ -45,4 +45,3 @@ export class PopulationEventController {
     return this.populationEventService.remove(id);
   }
 }
-

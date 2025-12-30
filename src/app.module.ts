@@ -10,12 +10,15 @@ import { ContributionModule } from './contribution/contribution.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module'
+import { UsersController } from './users/users.controller';
 import { RolesModule } from './roles/roles.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 import { PopulationEventModule } from './population-event/population-event.module';
 
 @Module({
+  controllers: [AppController, UsersController],
+  providers: [AppService],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
@@ -41,7 +44,5 @@ import { PopulationEventModule } from './population-event/population-event.modul
     AuthModule,
     RolesModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

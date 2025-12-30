@@ -6,31 +6,25 @@ import { UsersModule } from 'src/users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
-import { JwtStrategy } from './strategies/jwt.strategy'
-import { HouseholdLocalStrategy } from './strategies/household-local.strategy';
-import { HouseholdModule } from 'src/household/household.module';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { HouseholdModule } from '../household/household.module';
 
 @Module({
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    LocalStrategy,
-    JwtStrategy,
-    HouseholdLocalStrategy,
-  ],
+  providers: [AuthService, LocalStrategy, JwtStrategy],
   imports: [
     UsersModule,
-    HouseholdModule,
+    HouseholdModule, // Thêm dòng này
     ConfigModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: { expiresIn: '1h' },
       }),
     }),
-    PassportModule
+    PassportModule,
   ],
 })
 export class AuthModule {}

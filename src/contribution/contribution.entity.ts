@@ -6,7 +6,7 @@ import {
   CreateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { Household } from 'src/household/household.entity';
+import { Household } from '../household/household.entity';
 
 @Entity('contributions')
 export class Contribution {

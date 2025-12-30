@@ -2,7 +2,8 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';import { InjectRepository } from '@nestjs/typeorm';
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Person } from './person.entity';
 import { CreatePersonDto } from './dto/create-person.dto';
@@ -114,7 +115,7 @@ export class PersonService {
     });
     const group = {};
     Jobs.forEach((job) => {
-      const job_name: string = job.occupation;
+      const job_name = job.occupation || '';
       if (group[job_name] == null) {
         group[job_name] = 1;
       } else {
@@ -142,7 +143,6 @@ export class PersonService {
     });
     return group;
   }
-
   async importFromCsv(buffer: Buffer) {
     const csvText = buffer.toString('utf8');
     // Tách dòng, xử lý cả xuống dòng Windows (\r\n) và Linux (\n)
