@@ -12,8 +12,8 @@ export const contributionApi = {
     return axiosClient.get(`/contribution/${id}`);
   },
 
-  // Create contribution (expects: { type, amount, dueDate?, householdIds: number[] })
-  create: (data: { type: string; amount: number; dueDate?: string; householdIds: number[] }) => {
+  // Create contribution (backend expects a single householdId)
+  create: (data: { type: string; amount: number; dueDate?: string; householdId: number }) => {
     return axiosClient.post('/contribution', data);
   },
 
@@ -32,3 +32,5 @@ export const contributionApi = {
     return axiosClient.post(`/contribution/${id}/delete`);
   },
 };
+
+export default contributionApi;

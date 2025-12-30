@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { usePopulationEvent } from '../../hooks/usePopulationEvent';
 import { usePerson } from '../../hooks/usePerson';
-import { useAuth } from '../../hooks/useAuth';
 import { PopulationEvent } from '../../api/populationEventApi';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -9,12 +8,13 @@ import { Modal } from '../../components/ui/Modal';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { DataTable } from '../../components/ui/DataTable';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../../hooks/useToast';
 
 export const PopulationEventListPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { events, loading, error, fetchEvents, createEvent, updateEvent, deleteEvent } = usePopulationEvent();
   const { persons } = usePerson();
+  const toast = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<PopulationEvent | null>(null);
   const [formData, setFormData] = useState<Omit<PopulationEvent, 'id'>>({
@@ -27,6 +27,10 @@ export const PopulationEventListPage = () => {
   useEffect(() => {
     fetchEvents();
   }, []);
+
+  useEffect(() => {
+    if (error) toast.error(error);
+  }, [error, toast]);
 
   const handleOpenModal = (event?: PopulationEvent) => {
     if (event) {
@@ -65,13 +69,15 @@ export const PopulationEventListPage = () => {
     try {
       if (editingEvent?.id) {
         await updateEvent(editingEvent.id, formData);
+        toast.success('Cập nhật sự kiện dân số thành công!');
       } else {
         await createEvent(formData);
+        toast.success('Tạo sự kiện dân số thành công!');
       }
       handleCloseModal();
       fetchEvents();
     } catch (err) {
-      alert('Error saving event: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      toast.error(err instanceof Error ? err.message : 'Lỗi khi lưu sự kiện');
     }
   };
 
@@ -79,26 +85,31 @@ export const PopulationEventListPage = () => {
     if (window.confirm('Are you sure you want to delete this event?')) {
       try {
         await deleteEvent(id);
+        toast.success('Xóa sự kiện dân số thành công!');
         fetchEvents();
       } catch (err) {
-        alert('Error deleting event: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        toast.error(err instanceof Error ? err.message : 'Lỗi khi xóa sự kiện');
       }
     }
   };
 
   const columns = [
-    { key: 'id', label: 'ID' },
-    { 
-      key: 'type', 
-      label: 'Type',
-      render: (value: string) => <span className="capitalize">{value}</span>
+    { key: 'id', header: 'ID' },
+    {
+      key: 'type',
+      header: 'Type',
+      render: (row: PopulationEvent) => <span className="capitalize">{row.type}</span>,
     },
-    { key: 'description', label: 'Description' },
-    { key: 'eventDate', label: 'Event Date' },
+    {
+      key: 'description',
+      header: 'Description',
+      render: (row: PopulationEvent) => row.description || '-',
+    },
+    { key: 'eventDate', header: 'Event Date' },
     {
       key: 'actions',
-      label: 'Actions',
-      render: (_: unknown, row: PopulationEvent) => (
+      header: 'Actions',
+      render: (row: PopulationEvent) => (
         <div className="flex gap-2">
           <button
             onClick={() => handleOpenModal(row)}
@@ -123,12 +134,6 @@ export const PopulationEventListPage = () => {
     <div className="space-y-6">
       <PageHeader title="Population Events" subtitle="Manage population events" />
 
-      {error && (
-        <Card className="bg-red-50 border border-red-200">
-          <p className="text-red-700">{error}</p>
-        </Card>
-      )}
-
       <div className="flex justify-between items-center">
         <div className="flex gap-2">
           <Button
@@ -144,15 +149,11 @@ export const PopulationEventListPage = () => {
         {loading ? (
           <div className="text-center py-8">Loading...</div>
         ) : (
-          <DataTable
-            data={events.map(e => ({
-              id: e.id,
-              type: e.type,
-              description: e.description,
-              eventDate: e.eventDate,
-              actions: '',
-            }))}
+          <DataTable<PopulationEvent>
+            data={events}
             columns={columns}
+            rowKey={(r) => r.id ?? `${r.type}-${r.eventDate}`}
+            emptyText="Chưa có sự kiện dân số"
           />
         )}
       </Card>

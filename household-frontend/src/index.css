@@ -11,7 +11,7 @@ body {
 	background-color: #F7F8FA;
 }
 .sidebar-surface { background:#050816; }
-.card-header-gradient { background:linear-gradient(145deg,#FFFFFF 0%,#F4F4FF 40%,#FDF2FF 100%); }
+.card-header-gradient { background:#F4F3FF; }
 .shadow-deep { box-shadow:0 20px 45px rgba(15,23,42,0.16); }
 
 /* Global scrollbar (page) */
@@ -77,7 +77,7 @@ body.theme-dark .sidebar-surface {
 }
 
 body.theme-dark .card-header-gradient {
-	background: linear-gradient(145deg,#020617 0%,#020617 40%,#0B1120 100%);
+	background: rgba(15,23,42,0.92);
 }
 
 body.theme-dark .card {

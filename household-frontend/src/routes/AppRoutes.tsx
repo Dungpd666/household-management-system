@@ -1,6 +1,7 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, NavLink } from 'react-router-dom';
 import { useEffect, useState, ChangeEvent, FormEvent } from 'react';
 import { AuthProvider } from '../context/AuthContext';
+import { ToastProvider } from '../context/ToastContext';
 import { PersonProvider } from '../context/PersonContext';
 import { HouseholdProvider } from '../context/HouseholdContext';
 import { ContributionProvider } from '../context/ContributionContext';
@@ -22,29 +23,94 @@ import { ProfilePage } from '../pages/profile/ProfilePage';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { PopulationEventListPage } from '../pages/population-event/PopulationEventListPage';
-import { RoleManagementPage } from '../pages/roles/RoleManagementPage';
 import { useAuth } from '../hooks/useAuth';
 import { useUsers } from '../hooks/useUsers';
+import { useToast } from '../hooks/useToast';
 import { Button } from '../components/ui/Button';
 import { DataTable, Column } from '../components/ui/DataTable';
 import { Modal } from '../components/ui/Modal';
 import { FieldHint } from '../components/ui/FieldHint';
 import type { User } from '../types/users';
+import { personApi } from '../api/personApi';
+import { householdApi } from '../api/householdApi';
+import { populationEventApi } from '../api/populationEventApi';
+import type { Person } from '../types/person';
+import type { Household } from '../types/household';
+import type { PopulationEvent } from '../api/populationEventApi';
+import {
+  buildAgeStructure,
+  buildHouseholdSizeDistribution,
+  buildPopulationMovement,
+  buildPopulationOverview,
+  type DashboardStats,
+} from '../utils/dashboardStats';
+import { PopulationOverviewCard } from '../components/dashboard/charts/PopulationOverviewCard';
+import { AgeStructureCard } from '../components/dashboard/charts/AgeStructureCard';
+// Movement Flow chart intentionally not shown on Overview
+import { HouseholdSizeDistributionCard } from '../components/dashboard/charts/HouseholdSizeDistributionCard';
 
-// Pages - Placeholder
-const StatCard = ({ label, value, href, color }: { label: string; value: string; href: string; color: string }) => (
-  <a href={href} className="rounded-xl bg-white shadow-md shadow-slate-200/60 hover:shadow-lg transition block">
-    <div className="p-5">
-      <div className="text-textc-secondary text-sm">{label}</div>
-      <div className="text-3xl font-semibold mt-1">{value}</div>
+const StatIcon = ({ name }: { name: 'person' | 'household' | 'donate' | 'population' }) => {
+  const base = 'w-5 h-5';
+  switch (name) {
+    case 'household':
+      return (
+        <svg className={base} viewBox="0 0 24 24" fill="currentColor"><path d="M4 10l8-6 8 6v8a2 2 0 0 1-2 2h-3v-6H9v6H6a2 2 0 0 1-2-2v-8z"/></svg>
+      );
+    case 'donate':
+      return (
+        <svg className={base} viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5A4.49 4.49 0 0 1 6.5 4 4.93 4.93 0 0 1 12 6.09 4.93 4.93 0 0 1 17.5 4 4.49 4.49 0 0 1 22 8.5c0 3.78-3.4 6.86-8.55 11.54z"/></svg>
+      );
+    case 'population':
+      return (
+        <svg className={base} viewBox="0 0 24 24" fill="currentColor"><path d="M16 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm-8 0a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm0 2c-3.33 0-6 1.67-6 5v2h8v-2c0-2.21.9-3.67 2.33-4.58A10.44 10.44 0 0 0 8 13zm8 1c-3.87 0-6 2.13-6 5v2h12v-2c0-2.87-2.13-5-6-5z"/></svg>
+      );
+    case 'person':
+    default:
+      return (
+        <svg className={base} viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-5.33 0-8 2.67-8 6v2h16v-2c0-3.33-2.67-6-8-6z"/></svg>
+      );
+  }
+};
+
+const StatCard = ({
+  label,
+  value,
+  href,
+  hint,
+  tone,
+  icon,
+}: {
+  label: string;
+  value: string;
+  href: string;
+  hint?: string;
+  tone: { bg: string; text: string; iconBg: string; iconText: string };
+  icon: React.ReactNode;
+}) => (
+  <NavLink
+    to={href}
+    className={`group rounded-2xl p-5 flex items-start justify-between transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg ${tone.bg}`}
+  >
+    <div className="min-w-0">
+      <div className={`text-[12px] font-medium ${tone.text}`}>{label}</div>
+      <div className={`text-3xl font-bold mt-1 ${tone.text}`}>{value}</div>
+      {hint && <div className={`text-[11px] mt-1 ${tone.text} opacity-70`}>{hint}</div>}
     </div>
-    <div className={`px-5 py-2 text-xs tracking-wide uppercase ${color} text-white font-medium`}>Xem chi tiết →</div>
-  </a>
+    <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${tone.iconBg} ${tone.iconText} shrink-0`}>
+      {icon}
+    </div>
+  </NavLink>
 );
 
 const Dashboard = () => {
   const { user } = useAuth();
   const isSuperAdmin = user?.userRole === 'superadmin';
+
+  const toast = useToast();
+
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [statsError, setStatsError] = useState<string | null>(null);
 
   const { users, loading, error, fetchUsers, createUser, updateUser, deleteUser } = useUsers();
 
@@ -57,9 +123,62 @@ const Dashboard = () => {
     password: '',
     role: 'user',
   });
-  const [formError, setFormError] = useState<string | null>(null);
-  const [formSuccess, setFormSuccess] = useState<string | null>(null);
   const [showUserForm, setShowUserForm] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchAllPersons = async () => {
+      const all: Person[] = [];
+      const limit = 2000;
+      let skip = 0;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const params: Record<string, any> = { limit };
+        if (skip > 0) params.skip = skip;
+        const res = await personApi.getAll(params);
+        const batch = (res.data ?? []) as Person[];
+        all.push(...batch);
+        if (batch.length < limit) break;
+        skip += limit;
+      }
+      return all;
+    };
+
+    const fetchStats = async () => {
+      setStatsLoading(true);
+      setStatsError(null);
+      try {
+        const [persons, householdsRes, events] = await Promise.all([
+          fetchAllPersons(),
+          householdApi.getAll(),
+          populationEventApi.getAll(),
+        ]);
+
+        const households = (householdsRes.data ?? []) as Household[];
+        const populationEvents = (events ?? []) as PopulationEvent[];
+
+        const populationOverview = buildPopulationOverview(persons);
+        const ageStructure = buildAgeStructure(persons);
+        const movement = buildPopulationMovement(populationEvents);
+        const householdSize = buildHouseholdSizeDistribution(households);
+
+        if (!cancelled) {
+          setStats({ populationOverview, ageStructure, movement, householdSize });
+        }
+      } catch (err: any) {
+        if (!cancelled) setStatsError(err?.message || 'Không tải được thống kê');
+      } finally {
+        if (!cancelled) setStatsLoading(false);
+      }
+    };
+
+    fetchStats();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (isSuperAdmin) {
@@ -77,8 +196,6 @@ const Dashboard = () => {
       password: '',
       role: 'user',
     });
-    setFormError(null);
-    setFormSuccess(null);
     setShowUserForm(false);
   };
 
@@ -97,8 +214,6 @@ const Dashboard = () => {
       password: '',
       role: u.role === 'superadmin' ? 'superadmin' : u.role,
     });
-    setFormError(null);
-    setFormSuccess(null);
     setShowUserForm(true);
   };
 
@@ -106,27 +221,23 @@ const Dashboard = () => {
     const confirm = window.confirm(`Bạn có chắc muốn xóa người dùng "${u.fullName}"?`);
     if (!confirm) return;
 
-    setFormError(null);
-    setFormSuccess(null);
     try {
       await deleteUser(String(u.id));
-      setFormSuccess('Xóa người dùng thành công');
+      toast.success('Xóa người dùng thành công');
     } catch (err: any) {
-      setFormError(err?.message || 'Có lỗi khi xóa người dùng');
+      toast.error(err?.message || 'Có lỗi khi xóa người dùng');
     }
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setFormError(null);
-    setFormSuccess(null);
 
     if (!isSuperAdmin) return;
 
     const { fullName, userName, email, phone, password, role } = formValues;
 
     if (!fullName || !userName || !email || !phone) {
-      setFormError('Vui lòng nhập đầy đủ thông tin bắt buộc');
+      toast.error('Vui lòng nhập đầy đủ thông tin bắt buộc');
       return;
     }
 
@@ -143,7 +254,7 @@ const Dashboard = () => {
           payload.passWordHash = password;
         }
         await updateUser(String(editingId), payload);
-        setFormSuccess('Cập nhật người dùng thành công');
+        toast.success('Cập nhật người dùng thành công');
       } else {
         const payload: Omit<User, 'id' | 'createdAt' | 'updatedAt'> = {
           fullName,
@@ -154,11 +265,11 @@ const Dashboard = () => {
           role,
         };
         await createUser(payload);
-        setFormSuccess('Tạo người dùng mới thành công');
+        toast.success('Tạo người dùng mới thành công');
       }
       setFormValues((prev) => ({ ...prev, password: '' }));
     } catch (err: any) {
-      setFormError(err?.message || 'Có lỗi xảy ra khi lưu người dùng');
+      toast.error(err?.message || 'Có lỗi xảy ra khi lưu người dùng');
     }
   };
 
@@ -177,13 +288,11 @@ const Dashboard = () => {
           onChange={async (e) => {
             const newRole = e.target.value;
             if (newRole === u.role) return;
-            setFormError(null);
-            setFormSuccess(null);
             try {
               await updateUser(String(u.id), { role: newRole });
-              setFormSuccess('Cập nhật vai trò thành công');
+              toast.success('Cập nhật vai trò thành công');
             } catch (err: any) {
-              setFormError(err?.message || 'Có lỗi khi cập nhật vai trò');
+              toast.error(err?.message || 'Có lỗi khi cập nhật vai trò');
             }
           }}
         >
@@ -221,11 +330,63 @@ const Dashboard = () => {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Tổng quan</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Nhân khẩu" value="—" href="/persons" color="bg-blue-600" />
-        <StatCard label="Hộ gia đình" value="—" href="/households" color="bg-green-600" />
-        <StatCard label="Đóng góp" value="—" href="/contributions" color="bg-purple-600" />
-        <StatCard label="Người dùng" value="—" href="/users" color="bg-orange-600" />
+        <StatCard
+          label="Nhân khẩu"
+          value={stats ? String(stats.populationOverview.totalPersons) : '—'}
+          hint="Tổng số nhân khẩu"
+          href="/persons"
+          tone={{ bg: 'bg-blue-50', text: 'text-blue-700', iconBg: 'bg-blue-100', iconText: 'text-blue-700' }}
+          icon={<StatIcon name="person" />}
+        />
+        <StatCard
+          label="Hộ gia đình"
+          value={
+            stats
+              ? String(stats.householdSize.distribution.reduce((sum, d) => sum + d.value, 0))
+              : '—'
+          }
+          hint="Tổng số hộ gia đình"
+          href="/households"
+          tone={{ bg: 'bg-emerald-50', text: 'text-emerald-700', iconBg: 'bg-emerald-100', iconText: 'text-emerald-700' }}
+          icon={<StatIcon name="household" />}
+        />
+        <StatCard
+          label="Đóng góp"
+          value="—"
+          hint="Tổng khoản đóng góp"
+          href="/contributions"
+          tone={{ bg: 'bg-purple-50', text: 'text-purple-700', iconBg: 'bg-purple-100', iconText: 'text-purple-700' }}
+          icon={<StatIcon name="donate" />}
+        />
+        <StatCard
+          label="Sự kiện dân số"
+          value={
+            stats
+              ? String(
+                  stats.movement.inflow.birth
+                    + stats.movement.inflow.moveIn
+                    + stats.movement.outflow.death
+                    + stats.movement.outflow.moveOut,
+                )
+              : '—'
+          }
+          hint="Xem danh sách sự kiện"
+          href="/population-events"
+          tone={{ bg: 'bg-amber-50', text: 'text-amber-700', iconBg: 'bg-amber-100', iconText: 'text-amber-700' }}
+          icon={<StatIcon name="population" />}
+        />
       </div>
+
+      {statsLoading && <div className="text-sm text-textc-secondary">Đang tải thống kê...</div>}
+      {statsError && <div className="text-sm text-red-500">{statsError}</div>}
+
+      {stats && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <PopulationOverviewCard data={stats.populationOverview} />
+          <AgeStructureCard data={stats.ageStructure} />
+          <HouseholdSizeDistributionCard data={stats.householdSize} />
+        </div>
+      )}
 
       {isSuperAdmin && (
         <div className="space-y-4 mt-6">
@@ -264,8 +425,7 @@ const Dashboard = () => {
             title={editingId ? 'Chỉnh sửa người dùng' : 'Thêm mới người dùng'}
           >
             <form onSubmit={handleSubmit} className="space-y-4">
-                {formError && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-sm">{formError}</div>}
-                {formSuccess && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded text-sm">{formSuccess}</div>}
+
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FieldHint
@@ -382,6 +542,7 @@ const Dashboard = () => {
 export const AppRoutes = () => {
   return (
     <BrowserRouter>
+      <ToastProvider>
       <AuthProvider>
         <PersonProvider>
           <HouseholdProvider>
@@ -492,16 +653,6 @@ export const AppRoutes = () => {
                         )}
                       />
                       
-                      {/* Role Management Routes (admin only) */}
-                      <Route
-                        path="/roles"
-                        element={(
-                          <ProtectedRoute requiredRole="admin">
-                            <RoleManagementPage />
-                          </ProtectedRoute>
-                        )}
-                      />
-                      
                       {/* Users Routes (protected) - vẫn giữ cho xem danh sách chi tiết nếu cần */}
                       <Route
                         path="/users"
@@ -526,8 +677,14 @@ export const AppRoutes = () => {
                       <Route path="*" element={<Navigate to="/" replace />} />
                       </Routes>
                       </main>
-                      <div className="px-6 pb-6"><Footer /></div>
                     </Card>
+
+                    {/* Footer: card riêng giống Header */}
+                    <div className="mb-0.5">
+                      <Card padding={true}>
+                        <Footer />
+                      </Card>
+                    </div>
                   </div>
                 </div>
               </UsersProvider>
@@ -536,6 +693,7 @@ export const AppRoutes = () => {
           </HouseholdProvider>
         </PersonProvider>
       </AuthProvider>
+      </ToastProvider>
     </BrowserRouter>
   );
 };

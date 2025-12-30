@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { usePerson } from '../../hooks/usePerson';
+import { useToast } from '../../hooks/useToast';
 import { PersonForm } from '../../components/form/personForm';
 import type { Person } from '../../types/person';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { Card } from '../../components/ui/Card';
-import { DataTable, Avatar, StatusBadge, Column } from '../../components/ui/DataTable';
+import { DataTable, Avatar, Column } from '../../components/ui/DataTable';
 import { PillDropdown } from '../../components/ui/PillDropdown';
 import { Button } from '../../components/ui/Button';
 import { AnimatedNumber } from '../../components/ui/AnimatedNumber';
@@ -12,10 +13,9 @@ import { Modal } from '../../components/ui/Modal';
 
 export const PersonListPage = () => {
   const { persons, loading, error, fetchPersons, createPerson, updatePerson, deletePerson, importFromCsv } = usePerson();
+  const toast = useToast();
   const [editingPerson, setEditingPerson] = useState<Person | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [formError, setFormError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'permanent' | 'temporary' | 'moved'>('all');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -24,22 +24,25 @@ export const PersonListPage = () => {
   fetchPersons();
   }, []);
 
+  useEffect(() => {
+    if (error) toast.error(error);
+  }, [error, toast]);
+
   const handleSubmit = async (data: Omit<Person, 'id' | 'createdAt' | 'updatedAt'>) => {
-    setFormError('');
-    setSuccessMsg('');
+    // errors handled via toast
     try {
       if (editingPerson) {
         await updatePerson(String(editingPerson.id!), data);
-        setSuccessMsg('Cập nhật thành viên thành công!');
+        toast.success('Cập nhật thành viên thành công!');
       } else {
         await createPerson(data);
-        setSuccessMsg('Thêm thành viên mới thành công!');
+        toast.success('Thêm thành viên mới thành công!');
       }
       setShowForm(false);
       setEditingPerson(null);
       fetchPersons();
     } catch (err: any) {
-      setFormError(err?.message || 'Có lỗi khi lưu thành viên');
+      toast.error(err?.message || 'Có lỗi khi lưu thành viên');
     }
   };
 
@@ -50,14 +53,12 @@ export const PersonListPage = () => {
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Bạn có chắc muốn xóa thành viên này không?')) {
-      setFormError('');
-      setSuccessMsg('');
+      // errors handled via toast
       try {
         await deletePerson(id);
-        setSuccessMsg('Xóa thành viên thành công!');
         fetchPersons();
       } catch (err: any) {
-        setFormError(err?.message || 'Có lỗi khi xóa thành viên');
+        toast.error(err?.message || 'Có lỗi khi xóa thành viên');
       }
     }
   };
@@ -66,13 +67,12 @@ export const PersonListPage = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setFormError('');
-    setSuccessMsg('');
+    // errors handled via toast
     try {
       await importFromCsv(file);
-      setSuccessMsg('Import dữ liệu CSV thành công!');
+      toast.success('Import dữ liệu CSV thành công!');
     } catch (err: any) {
-      setFormError(err?.message || 'Có lỗi khi import dữ liệu từ CSV');
+      toast.error(err?.message || 'Có lỗi khi import dữ liệu từ CSV');
     } finally {
       // reset input để có thể chọn lại cùng một file nếu cần
       e.target.value = '';
@@ -82,7 +82,7 @@ export const PersonListPage = () => {
   const handleExportCsv = () => {
     const rows = persons;
     if (!rows.length) {
-      setFormError('Không có dữ liệu để xuất CSV');
+      toast.error('Không có dữ liệu để xuất CSV');
       return;
     }
 
@@ -199,8 +199,6 @@ export const PersonListPage = () => {
             variant="gray"
             onClick={() => {
               setEditingPerson(null);
-              setFormError('');
-              setSuccessMsg('');
               setShowForm(true);
             }}
           >
@@ -208,9 +206,7 @@ export const PersonListPage = () => {
           </Button>
         )}
       />
-      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>}
-      {formError && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{formError}</div>}
-      {successMsg && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">{successMsg}</div>}
+
 
       <Modal
         isOpen={showForm || !!editingPerson}
@@ -229,30 +225,53 @@ export const PersonListPage = () => {
         )}
       </Modal>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-surface-base" padding>
-          <div className="text-[12px] font-medium text-textc-secondary mb-1">Tổng nhân khẩu</div>
-          <div className="text-2xl font-semibold text-textc-primary">
-            <AnimatedNumber value={totalPersons} />
+        <div className="rounded-2xl p-5 flex items-start justify-between transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg bg-blue-50">
+          <div className="min-w-0">
+            <div className="text-[12px] font-medium text-blue-700">Tổng nhân khẩu</div>
+            <div className="text-3xl font-bold mt-1 text-blue-700">
+              <AnimatedNumber value={totalPersons} />
+            </div>
           </div>
-        </Card>
-        <Card className="bg-surface-base" padding>
-          <div className="text-[12px] font-medium text-textc-secondary mb-1">Thường trú</div>
-          <div className="text-2xl font-semibold text-emerald-500">
-            <AnimatedNumber value={permanentCount} />
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-blue-100 text-blue-700 shrink-0">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-5.33 0-8 2.67-8 6v2h16v-2c0-3.33-2.67-6-8-6z"/></svg>
           </div>
-        </Card>
-        <Card className="bg-surface-base" padding>
-          <div className="text-[12px] font-medium text-textc-secondary mb-1">Tạm trú</div>
-          <div className="text-2xl font-semibold text-amber-500">
-            <AnimatedNumber value={temporaryCount} />
+        </div>
+
+        <div className="rounded-2xl p-5 flex items-start justify-between transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg bg-emerald-50">
+          <div className="min-w-0">
+            <div className="text-[12px] font-medium text-emerald-700">Thường trú</div>
+            <div className="text-3xl font-bold mt-1 text-emerald-700">
+              <AnimatedNumber value={permanentCount} />
+            </div>
           </div>
-        </Card>
-        <Card className="bg-surface-base" padding>
-          <div className="text-[12px] font-medium text-textc-secondary mb-1">Đã chuyển đi</div>
-          <div className="text-2xl font-semibold text-rose-500">
-            <AnimatedNumber value={movedCount} />
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-emerald-100 text-emerald-700 shrink-0">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M4 10l8-6 8 6v8a2 2 0 0 1-2 2h-3v-6H9v6H6a2 2 0 0 1-2-2v-8z"/></svg>
           </div>
-        </Card>
+        </div>
+
+        <div className="rounded-2xl p-5 flex items-start justify-between transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg bg-amber-50">
+          <div className="min-w-0">
+            <div className="text-[12px] font-medium text-amber-700">Tạm trú</div>
+            <div className="text-3xl font-bold mt-1 text-amber-700">
+              <AnimatedNumber value={temporaryCount} />
+            </div>
+          </div>
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-amber-100 text-amber-700 shrink-0">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22a10 10 0 1 1 10-10 10.01 10.01 0 0 1-10 10zm1-10.59V7h-2v6l5.25 3.15 1-1.65z"/></svg>
+          </div>
+        </div>
+
+        <div className="rounded-2xl p-5 flex items-start justify-between transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg bg-rose-50">
+          <div className="min-w-0">
+            <div className="text-[12px] font-medium text-rose-700">Đã chuyển đi</div>
+            <div className="text-3xl font-bold mt-1 text-rose-700">
+              <AnimatedNumber value={movedCount} />
+            </div>
+          </div>
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-rose-100 text-rose-700 shrink-0">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M10 9V5l-7 7 7 7v-4h4v-6zM14 19h2V5h-2z"/></svg>
+          </div>
+        </div>
       </div>
 
       <Card className="mt-6" padding={false} variant="table">
@@ -310,16 +329,11 @@ export const PersonListPage = () => {
               { key: 'dateOfBirth', header: 'Ngày sinh', render: (r) => r.dateOfBirth ? new Date(r.dateOfBirth).toLocaleDateString() : '' },
               { key: 'gender', header: 'Giới tính', render: (r) => r.gender === 'male' ? 'Nam' : r.gender === 'female' ? 'Nữ' : 'Khác' },
               { key: 'migrationStatus', header: 'Tình trạng', render: (r) => {
-                const map: Record<string, { label: string; tone: 'green'|'yellow'|'red'|'gray' }> = {
-                  permanent: { label: 'Thường trú', tone: 'green' },
-                  temporary: { label: 'Tạm trú', tone: 'yellow' },
-                  moved: { label: 'Đã chuyển đi', tone: 'red' },
-                };
                 const key = normalizeStatusKey(r.migrationStatus);
-                const info: { label: string; tone: 'green'|'yellow'|'red'|'gray' } = key && map[key]
-                  ? map[key]
-                  : { label: r.migrationStatus || '-', tone: 'gray' };
-                return <StatusBadge label={info.label} tone={info.tone} />;
+                if (key === 'moved') return <span className="badge-red">Đã chuyển đi</span>;
+                if (key === 'temporary') return <span className="badge-yellow">Tạm trú</span>;
+                if (key === 'permanent') return <span className="badge-green">Thường trú</span>;
+                return <span className="badge-yellow">{r.migrationStatus || '-'}</span>;
               } },
               { key: 'occupation', header: 'Nghề nghiệp' },
               { key: 'educationLevel', header: 'Học vấn' },

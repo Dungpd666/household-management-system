@@ -37,16 +37,16 @@ const Icon = ({ name }: { name: 'home' | 'household' | 'person' | 'donate' | 'us
 };
 
 export const Sidebar = () => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const displayName = user?.userName || 'Admin';
+  const displayName = isAuthenticated ? (user?.userName || 'Người dùng') : 'Khách';
   const initials = displayName
     .split(' ')
     .map((p) => p[0])
     .join('')
     .slice(0, 2)
     .toUpperCase();
-  const roleLabel = user?.userRole || 'admin';
+  const roleLabel = isAuthenticated ? (user?.userRole || 'USER') : 'GUEST';
 
   return (
     <aside className="w-full h-full flex flex-col bg-transparent text-white">
@@ -84,13 +84,6 @@ export const Sidebar = () => {
         <NavLink to="/population-events" className={({ isActive }) => navItemClass({ isActive })}>
           <Icon name="person" /> <span>Sự kiện dân số</span>
         </NavLink>
-        
-        <div className="mt-4 mb-2 text-[11px] font-semibold opacity-60 text-white/60 uppercase">Hệ thống</div>
-        {(user?.userRole === 'superadmin' || user?.userRole === 'admin') && (
-          <NavLink to="/roles" className={({ isActive }) => navItemClass({ isActive })}>
-            <Icon name="users" /> <span>Phân quyền</span>
-          </NavLink>
-        )}
       </nav>
 
       {/* User info ngay dưới các chức năng */}

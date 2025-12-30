@@ -11,10 +11,10 @@ export default {
       },
       colors: {
         sidebar: {
-          bg: '#1E2538',
-          active: '#2A3449',
-          hover: '#323D54',
-          border: '#3C4861'
+          bg: ' #17192D',
+          active: '#22253B',
+          hover: '#292C44',
+          border: '#303552'
         },
         brand: {
           primary: '#4ADE80',
