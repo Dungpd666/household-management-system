@@ -7,11 +7,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { HouseholdLocalStrategy } from './strategies/household-local.strategy';
 import { HouseholdModule } from '../household/household.module';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, HouseholdLocalStrategy],
   imports: [
     UsersModule,
     HouseholdModule, // Thêm dòng này

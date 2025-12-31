@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import type { AuthUser } from '../../api/authApi';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { Card } from '../../components/ui/Card';
 import { personApi } from '../../api/personApi';
@@ -21,12 +22,13 @@ import { AgeStructureCard } from '../../components/dashboard/charts/AgeStructure
 import { HouseholdSizeDistributionCard } from '../../components/dashboard/charts/HouseholdSizeDistributionCard';
 
 export const PopulationStatsPage = () => {
-  const { user } = useAuth();
+  const { user, isAdminUser } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isSuperAdmin = user?.userRole === 'superadmin';
+  const adminUser = isAdminUser() ? (user as AuthUser) : null;
+  const isSuperAdmin = adminUser?.userRole === 'superadmin';
 
   useEffect(() => {
     if (!isSuperAdmin) return;

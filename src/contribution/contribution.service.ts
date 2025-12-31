@@ -205,6 +205,83 @@ export class ContributionService {
     return { contribution, paymentUrl };
   }
 
+  // Tạo URL VNPay cho nhiều đóng góp
+  async createVnpayUrlMultiple(contributionIds: number[], clientIp: string) {
+    // Kiểm tra tất cả contributions tồn tại và chưa thanh toán
+    const contributions = await Promise.all(
+      contributionIds.map((id) => this.findById(id)),
+    );
+
+    for (const contribution of contributions) {
+      if (!contribution) {
+        throw new NotFoundException('One or more contributions not found');
+      }
+      if (contribution.paid) {
+        throw new BadRequestException(
+          `Contribution ${contribution.id} already paid`,
+        );
+      }
+    }
+
+    // Tính tổng số tiền
+    const totalAmount = contributions.reduce(
+      (sum, c) => sum + (c.amount || 0),
+      0,
+    );
+
+    // Lấy các tham số VNPAY
+    const tmnCode = this.configService.get<string>('vnpay.vnp_TmnCode');
+    const hashSecret =
+      this.configService.get<string>('vnpay.vnp_HashSecret') || '';
+    const vnpUrl = this.configService.get<string>('vnpay.vnp_Url');
+    const returnUrl = this.configService.get<string>('vnpay.vnp_ReturnUrl');
+    const timeLimit = this.configService.get<number>('vnpay.timeLimit') || 15;
+
+    this.logger.debug('VNPay config:', { tmnCode, vnpUrl, returnUrl, timeLimit });
+    const createDate = this.formatDate(new Date());
+    const expireDate = this.formatDate(
+      new Date(Date.now() + timeLimit * 60 * 1000),
+    );
+
+    // Tạo order ID từ các contribution IDs
+    const orderId = `${contributionIds.join('-')}-${Date.now()}`;
+    const amount = totalAmount * 100; // Tính theo VND * 100
+
+    const params: any = {
+      vnp_Version: '2.1.0',
+      vnp_Command: 'pay',
+      vnp_TmnCode: tmnCode,
+      vnp_Amount: amount,
+      vnp_BankCode: 'NCB',
+      vnp_CreateDate: createDate,
+      vnp_CurrCode: 'VND',
+      vnp_IpAddr: clientIp,
+      vnp_Locale: 'vn',
+      vnp_OrderInfo: `Thanh toan ${contributionIds.length} khoan dong gop`,
+      vnp_OrderType: 'other',
+      vnp_ReturnUrl: returnUrl,
+      vnp_ExpireDate: expireDate,
+      vnp_TxnRef: orderId,
+    };
+
+    // Sắp xếp các tham số theo đúng thứ tự
+    const sorted = this.sortObject(params);
+
+    // Tạo chuỗi được băm
+    const signData = qs.stringify(sorted, { encode: false });
+    const hmac = crypto.createHmac('sha512', hashSecret);
+    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
+    sorted['vnp_SecureHash'] = signed;
+
+    // Ghép lại thành URL hoàn chỉnh
+    const paymentUrl = `${vnpUrl}?${qs.stringify(sorted, { encode: false })}`;
+    return {
+      contributions,
+      totalAmount,
+      paymentUrl,
+    };
+  }
+
   // Xử lý phản hồi từ VNPAY
   async handleVnpayReturn(query: any) {
     const secretKey =
@@ -229,25 +306,48 @@ export class ContributionService {
     const responseCode = query['vnp_ResponseCode'];
     const txnRef = query['vnp_TxnRef'] as string;
 
-    // Lấy contributionId từ txnRef
-    const contributionId = Number(txnRef.split('-')[0]);
-    if (Number.isNaN(contributionId)) {
+    // Lấy contributionIds từ txnRef
+    // Format: {id1}-{id2}-...-{timestamp}
+    const parts = txnRef.split('-');
+    const timestamp = parts[parts.length - 1]; // Phần cuối là timestamp
+    const contributionIds: number[] = [];
+
+    // Parse các IDs (tất cả parts trừ timestamp cuối)
+    for (let i = 0; i < parts.length - 1; i++) {
+      const id = Number(parts[i]);
+      if (!Number.isNaN(id)) {
+        contributionIds.push(id);
+      }
+    }
+
+    if (contributionIds.length === 0) {
       throw new BadRequestException('Invalid order reference');
     }
 
-    // Kiểm tra contribution có tồn tại không
-    const contribution = await this.findById(contributionId);
-    if (!contribution) {
-      throw new NotFoundException('Contribution not found');
+    // Kiểm tra contributions có tồn tại không
+    const contributions = await Promise.all(
+      contributionIds.map((id) => this.findById(id)),
+    );
+
+    for (const contribution of contributions) {
+      if (!contribution) {
+        throw new NotFoundException('One or more contributions not found');
+      }
     }
 
     // Xử lý theo mã phản hồi từ VNPAY
     if (responseCode === '00') {
-      // Thanh toán thành công
+      // Thanh toán thành công - Cập nhật tất cả contributions
+      for (const contribution of contributions) {
+        contribution.paid = true;
+        contribution.paidAt = new Date();
+        await this.repo.save(contribution);
+      }
+
       return {
         success: true,
         message: 'Payment successful',
-        contributionId: contributionId,
+        contributionIds: contributionIds,
         transactionRef: txnRef,
       };
     }
@@ -257,7 +357,7 @@ export class ContributionService {
       success: false,
       message: 'Payment failed or cancelled',
       responseCode,
-      contributionId: contributionId,
+      contributionIds: contributionIds,
       transactionRef: txnRef,
     };
   }

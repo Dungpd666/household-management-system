@@ -28,6 +28,8 @@ export class AuthGuard implements CanActivate {
         userID: payLoad.sub,
         userRole: payLoad.role,
         userName: payLoad.username,
+        userType: payLoad.userType,
+        householdCode: payLoad.householdCode,
       };
       return true;
     } catch (error) {

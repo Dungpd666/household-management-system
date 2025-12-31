@@ -31,6 +31,16 @@ export const contributionApi = {
   delete: (id: string) => {
     return axiosClient.post(`/contribution/${id}/delete`);
   },
+
+  // Create VNPay payment URL for single contribution
+  createVnpayUrl: (id: number) => {
+    return axiosClient.post(`/contribution/${id}/vnpay`);
+  },
+
+  // Create VNPay payment URL for multiple contributions
+  createVnpayUrlMultiple: (contributionIds: number[]) => {
+    return axiosClient.post('/contribution/vnpay-multiple', { contributionIds });
+  },
 };
 
 export default contributionApi;

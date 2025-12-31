@@ -33,7 +33,24 @@ export class ContributionController {
     return this.contributionService.create(dto);
   }
 
-  // Gọi cổng thanh toán VNPAY: admin/superadmin/user
+  // Gọi cổng thanh toán VNPAY cho nhiều khoản phí: admin/superadmin/household
+  @Roles(RoleEnum.admin, RoleEnum.superadmin, RoleEnum.household)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Post('vnpay-multiple')
+  createVnpayUrlMultiple(
+    @Body() body: { contributionIds: number[] },
+    @Ip() reqIp: string,
+  ) {
+    const clientIp = reqIp.includes('::ffff:')
+      ? reqIp.split('::ffff:')[1]
+      : reqIp;
+    return this.contributionService.createVnpayUrlMultiple(
+      body.contributionIds,
+      String(clientIp),
+    );
+  }
+
+  // Gọi cổng thanh toán VNPAY cho một khoản phí: admin/superadmin/household
   @Roles(RoleEnum.admin, RoleEnum.superadmin, RoleEnum.household)
   @UseGuards(AuthGuard, RolesGuard)
   @Post(':id/vnpay')

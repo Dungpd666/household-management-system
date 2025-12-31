@@ -22,6 +22,7 @@ import { PopulationEventModule } from './population-event/population-event.modul
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
       load: [appConfig, typeormConfig, vnpayConfig],
     }),
 

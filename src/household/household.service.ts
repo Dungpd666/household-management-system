@@ -7,6 +7,7 @@ import { Person } from '../person/person.entity';
 import { CreateHouseholdDto } from './dto/create-household.dto';
 import { UpdateHouseholdDto } from './dto/update-household.dto';
 import { SetHouseholdPasswordDto } from './dto/set-household-password.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class HouseholdService {
@@ -34,17 +35,20 @@ export class HouseholdService {
     // 1. Sinh mật khẩu ngẫu nhiên
     const rawPassword = this.generateRandomPassword(6);
 
-    // 2. Tạo đối tượng household với mật khẩu đã sinh
+    // 2. Hash mật khẩu
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
+
+    // 3. Tạo đối tượng household với mật khẩu đã hash
     const household = this.householdRepo.create({
       ...data,
-      password: rawPassword, // Lưu mật khẩu (nên hash nếu muốn bảo mật cao hơn)
-      isActive: true, // Mặc định kích hoạt luôn
+      password: hashedPassword,
+      isActive: true,
     });
 
-    // 3. Lưu vào DB
+    // 4. Lưu vào DB
     const savedHousehold = await this.householdRepo.save(household);
 
-    // 4. Trả về kết quả kèm mật khẩu gốc để hiển thị cho Admin
+    // 5. Trả về kết quả kèm mật khẩu gốc để hiển thị cho Admin
     return {
       ...savedHousehold,
       generatedPassword: rawPassword, // Trường này quan trọng để Admin cấp cho chủ hộ
@@ -108,8 +112,9 @@ export class HouseholdService {
       throw new NotFoundException('Household not found');
     }
 
-    // Cập nhật mật khẩu (theo pattern hiện tại: không hash)
-    household.password = setPasswordDto.password;
+    // Hash mật khẩu trước khi lưu
+    const hashedPassword = await bcrypt.hash(setPasswordDto.password, 10);
+    household.password = hashedPassword;
     household.isActive = true;
 
     await this.householdRepo.save(household);
@@ -142,10 +147,44 @@ export class HouseholdService {
       return null;
     }
 
-    if (household.password !== password) {
+    const isPasswordValid = await bcrypt.compare(password, household.password);
+    if (!isPasswordValid) {
       return null;
     }
 
     return household;
+  }
+
+  async changeHouseholdPassword(
+    householdId: number,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
+    const household = await this.householdRepo.findOne({
+      where: { id: householdId },
+    });
+
+    if (!household) {
+      throw new NotFoundException('Household not found');
+    }
+
+    if (!household.password) {
+      throw new NotFoundException('Household has no password set');
+    }
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      household.password,
+    );
+    if (!isPasswordValid) {
+      throw new NotFoundException('Current password is incorrect');
+    }
+
+    // Hash and update new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    household.password = hashedPassword;
+
+    await this.householdRepo.save(household);
   }
 }

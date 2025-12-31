@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { config as loadEnv } from 'dotenv';
+import * as bcrypt from 'bcrypt';
 import { User } from '../src/users/users.entity';
 import typeormConfig from '../src/config/typeorm.config';
 
@@ -24,14 +25,20 @@ async function seedSuperAdmin() {
     const existing = await userRepo.findOne({ where: { userName: 'superadmin' } });
     if (existing) {
       console.log('Superadmin already exists with username "superadmin"');
+      console.log('Updating password to hashed version...');
+      const hashedPassword = await bcrypt.hash('superadmin123', 10);
+      existing.passWordHash = hashedPassword;
+      await userRepo.save(existing);
+      console.log('Password updated successfully!');
       await dataSource.destroy();
       return;
     }
 
+    const hashedPassword = await bcrypt.hash('superadmin123', 10);
     const admin = userRepo.create({
       fullName: 'Super Administrator',
       userName: 'superadmin',
-      passWordHash: 'superadmin123',
+      passWordHash: hashedPassword,
       email: 'superadmin@example.com',
       phone: '0900000000',
       role: 'superadmin',

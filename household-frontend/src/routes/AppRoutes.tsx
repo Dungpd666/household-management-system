@@ -21,11 +21,18 @@ import { ContributionListPage } from '../pages/contribution/ContributionListPage
 import { UsersListPage } from '../pages/users/UsersListPage';
 import { ProfilePage } from '../pages/profile/ProfilePage';
 import { LoginPage } from '../pages/auth/LoginPage';
+import { HouseholdLoginPage } from '../pages/auth/HouseholdLoginPage';
+import { HouseholdDashboard } from '../pages/household-portal/HouseholdDashboard';
+import { HouseholdPayment } from '../pages/household-portal/HouseholdPayment';
+import { PaymentResult } from '../pages/household-portal/PaymentResult';
+import { HouseholdChangePasswordPage } from '../pages/household-portal/HouseholdChangePasswordPage';
 import { ProtectedRoute } from './ProtectedRoute';
+import { HouseholdProtectedRoute } from './HouseholdProtectedRoute';
 import { PopulationEventListPage } from '../pages/population-event/PopulationEventListPage';
 import { useAuth } from '../hooks/useAuth';
 import { useUsers } from '../hooks/useUsers';
 import { useToast } from '../hooks/useToast';
+import type { AuthUser } from '../api/authApi';
 import { Button } from '../components/ui/Button';
 import { DataTable, Column } from '../components/ui/DataTable';
 import { Modal } from '../components/ui/Modal';
@@ -103,8 +110,9 @@ const StatCard = ({
 );
 
 const Dashboard = () => {
-  const { user } = useAuth();
-  const isSuperAdmin = user?.userRole === 'superadmin';
+  const { user, isAdminUser } = useAuth();
+  const adminUser = isAdminUser() ? (user as AuthUser) : null;
+  const isSuperAdmin = adminUser?.userRole === 'superadmin';
 
   const toast = useToast();
 
@@ -549,27 +557,68 @@ export const AppRoutes = () => {
             <ContributionProvider>
               <PopulationEventProvider>
                 <UsersProvider>
-                <div className="min-h-screen app-shell flex">
-                  {/* Sidebar full height, kéo theo toàn bộ chiều cao nội dung */}
-                  <div className="hidden md:block w-60 xl:w-64 bg-slate-950 text-white">
-                    <Sidebar />
-                  </div>
+                  <Routes>
+                    {/* Public Routes - No Layout */}
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/household-login" element={<HouseholdLoginPage />} />
 
-                  {/* Cột phải: header + nội dung */}
-                  <div className="flex-1 flex flex-col p-4 gap-4">
-                    {/* Header cố định vị trí, dịch lên gần đỉnh hơn một chút */}
-                    <div className="mt-0.5">
-                      <Card padding={true}>
-                        <Header />
-                      </Card>
-                    </div>
+                    {/* Household Portal Routes - With HouseholdLayout */}
+                    <Route
+                      path="/household/dashboard"
+                      element={(
+                        <HouseholdProtectedRoute>
+                          <HouseholdDashboard />
+                        </HouseholdProtectedRoute>
+                      )}
+                    />
+                    <Route
+                      path="/household/payment"
+                      element={(
+                        <HouseholdProtectedRoute>
+                          <HouseholdPayment />
+                        </HouseholdProtectedRoute>
+                      )}
+                    />
+                    <Route
+                      path="/household/payment-result"
+                      element={(
+                        <HouseholdProtectedRoute>
+                          <PaymentResult />
+                        </HouseholdProtectedRoute>
+                      )}
+                    />
+                    <Route
+                      path="/household/change-password"
+                      element={(
+                        <HouseholdProtectedRoute>
+                          <HouseholdChangePasswordPage />
+                        </HouseholdProtectedRoute>
+                      )}
+                    />
 
-                    {/* Content bên dưới */}
-                    <Card className="flex-1" padding={false}>
-                      <main className="p-6">
-                      <Routes>
-                      {/* Public Routes */}
-                      <Route path="/login" element={<LoginPage />} />
+                    {/* Admin Routes - With Admin Layout */}
+                    <Route
+                      path="/*"
+                      element={(
+                        <div className="min-h-screen app-shell flex">
+                          {/* Sidebar full height, kéo theo toàn bộ chiều cao nội dung */}
+                          <div className="hidden md:block w-60 xl:w-64 bg-slate-950 text-white">
+                            <Sidebar />
+                          </div>
+
+                          {/* Cột phải: header + nội dung */}
+                          <div className="flex-1 flex flex-col p-4 gap-4">
+                            {/* Header cố định vị trí, dịch lên gần đỉnh hơn một chút */}
+                            <div className="mt-0.5">
+                              <Card padding={true}>
+                                <Header />
+                              </Card>
+                            </div>
+
+                            {/* Content bên dưới */}
+                            <Card className="flex-1" padding={false}>
+                              <main className="p-6">
+                                <Routes>
                       
                       {/* Dashboard (protected) */}
                       <Route
@@ -673,20 +722,23 @@ export const AppRoutes = () => {
                         )}
                       />
                       
-                      {/* Catch all */}
-                      <Route path="*" element={<Navigate to="/" replace />} />
-                      </Routes>
-                      </main>
-                    </Card>
+                                  {/* Catch all */}
+                                  <Route path="*" element={<Navigate to="/" replace />} />
+                                </Routes>
+                              </main>
+                            </Card>
 
-                    {/* Footer: card riêng giống Header */}
-                    <div className="mb-0.5">
-                      <Card padding={true}>
-                        <Footer />
-                      </Card>
-                    </div>
-                  </div>
-                </div>
+                            {/* Footer: card riêng giống Header */}
+                            <div className="mb-0.5">
+                              <Card padding={true}>
+                                <Footer />
+                              </Card>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    />
+                  </Routes>
               </UsersProvider>
               </PopulationEventProvider>
             </ContributionProvider>

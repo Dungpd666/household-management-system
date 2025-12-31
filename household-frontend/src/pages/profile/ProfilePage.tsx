@@ -1,10 +1,11 @@
 import { useState, ChangeEvent } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import type { AuthUser } from '../../api/authApi';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 
 export const ProfilePage = () => {
-  const { user } = useAuth();
+  const { user, isAdminUser } = useAuth();
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -14,13 +15,14 @@ export const ProfilePage = () => {
     setAvatarPreview(url);
   };
 
-  const displayName = user?.userName || 'Tài khoản hiện tại';
+  const adminUser = isAdminUser() ? (user as AuthUser) : null;
+  const displayName = adminUser?.userName || 'Tài khoản hiện tại';
   const roleLabel =
-    user?.userRole === 'superadmin'
+    adminUser?.userRole === 'superadmin'
       ? 'SUPERADMIN'
-      : user?.userRole === 'admin'
+      : adminUser?.userRole === 'admin'
         ? 'ADMIN'
-        : user?.userRole === 'user'
+        : adminUser?.userRole === 'user'
           ? 'USER'
           : 'CHƯA PHÂN QUYỀN';
 
@@ -96,7 +98,7 @@ export const ProfilePage = () => {
           <div>
             <div className="text-xs text-slate-500 mb-1">Tên đăng nhập</div>
             <div className="font-mono text-xs bg-slate-100 px-2 py-1 rounded">
-              {user?.userName || '—'}
+              {adminUser?.userName || '—'}
             </div>
           </div>
           <div>

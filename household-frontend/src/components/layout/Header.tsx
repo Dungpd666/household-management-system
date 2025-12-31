@@ -4,14 +4,17 @@ import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 import bkLogo from '../../assets/logo2.jpg';
 
+import type { AuthUser } from '../../api/authApi';
+
 export const Header = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, isAdminUser } = useAuth();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
-  const displayName = isAuthenticated ? user?.userName || 'Người dùng' : 'Khách';
+  const adminUser = isAdminUser() ? (user as AuthUser) : null;
+  const displayName = isAuthenticated ? adminUser?.userName || 'Người dùng' : 'Khách';
 
   const searchItems = [
     { label: 'Tổng quan', path: '/', keywords: ['tong quan', 'dashboard', 'home', 'trang chu'] },

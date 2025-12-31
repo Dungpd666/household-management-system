@@ -1,5 +1,5 @@
 import { useEffect, useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
 import { Card } from '../../components/ui/Card';
@@ -72,6 +72,14 @@ export const LoginPage = () => {
             {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
           </Button>
         </form>
+        <div className="mt-4 text-center">
+          <Link
+            to="/household-login"
+            className="text-xs text-brand-purple hover:underline"
+          >
+            Đăng nhập với tài khoản hộ gia đình
+          </Link>
+        </div>
       </Card>
     </div>
   );

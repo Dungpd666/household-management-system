@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { SidebarSection } from './SidebarSection';
 import { useAuth } from '../../hooks/useAuth';
+import type { AuthUser } from '../../api/authApi';
 
 // Navy sidebar styling: subtle translucent active pill, white text
 const navItemClass = ({ isActive }: { isActive?: boolean }) =>
@@ -37,16 +38,17 @@ const Icon = ({ name }: { name: 'home' | 'household' | 'person' | 'donate' | 'us
 };
 
 export const Sidebar = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isAdminUser } = useAuth();
   const navigate = useNavigate();
-  const displayName = isAuthenticated ? (user?.userName || 'Người dùng') : 'Khách';
+  const adminUser = isAdminUser() ? (user as AuthUser) : null;
+  const displayName = isAuthenticated ? (adminUser?.userName || 'Người dùng') : 'Khách';
   const initials = displayName
     .split(' ')
-    .map((p) => p[0])
+    .map((p: string) => p[0])
     .join('')
     .slice(0, 2)
     .toUpperCase();
-  const roleLabel = isAuthenticated ? (user?.userRole || 'USER') : 'GUEST';
+  const roleLabel = isAuthenticated ? (adminUser?.userRole || 'USER') : 'GUEST';
 
   return (
     <aside className="w-full h-full flex flex-col bg-transparent text-white">
