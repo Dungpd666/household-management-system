@@ -21,8 +21,23 @@ export class UsersService {
       user.role = role;
       return await this.usersRepository.save(user);
     } catch (error) {
-      throw new BadRequestException('Failed to create user: ' + error.message);
-    }
+      if ((error as any)?.code === '23505') {
+        const detail: string = (error as any).detail || '';
+
+        if (detail.includes('(username)')) {
+          throw new BadRequestException('Tên đăng nhập đã tồn tại. Vui lòng chọn tên đăng nhập khác.');
+        }
+        if (detail.includes('(email)')) {
+          throw new BadRequestException('Email này đã được sử dụng. Vui lòng dùng một địa chỉ email khác.');
+        }
+        if (detail.includes('(phone)')) {
+          throw new BadRequestException('Số điện thoại này đã được sử dụng. Vui lòng dùng một số điện thoại khác.');
+        }
+
+        throw new BadRequestException('Thông tin người dùng bị trùng. Vui lòng kiểm tra lại tên đăng nhập, email và số điện thoại.');
+      }
+
+      throw new BadRequestException('Không thể tạo người dùng mới. Vui lòng thử lại sau hoặc liên hệ quản trị viên.');    }
   }
 
   async findAllUsers() {
@@ -121,7 +136,7 @@ export class UsersService {
       }
       return user;
     } catch (error) {
-      throw new InternalServerErrorException('Error fetching user by username');
+      throw new InternalServerErrorException('Error fetching user by username (service)');
     }
   }
 
@@ -148,8 +163,23 @@ export class UsersService {
         ],
       });
     } catch (error) {
-      throw new BadRequestException('Failed to update user: ' + error.message);
-    }
+      if ((error as any)?.code === '23505') {
+        const detail: string = (error as any).detail || '';
+
+        if (detail.includes('(username)')) {
+          throw new BadRequestException('Tên đăng nhập đã tồn tại. Vui lòng chọn tên đăng nhập khác.');
+        }
+        if (detail.includes('(email)')) {
+          throw new BadRequestException('Email này đã được sử dụng. Vui lòng dùng một địa chỉ email khác.');
+        }
+        if (detail.includes('(phone)')) {
+          throw new BadRequestException('Số điện thoại này đã được sử dụng. Vui lòng dùng một số điện thoại khác.');
+        }
+
+        throw new BadRequestException('Thông tin người dùng bị trùng. Vui lòng kiểm tra lại tên đăng nhập, email và số điện thoại.');
+      }
+
+      throw new BadRequestException('Không thể cập nhật người dùng. Vui lòng thử lại sau hoặc liên hệ quản trị viên.');    }
   }
 
   async removeUser(id: number) {
@@ -161,12 +191,7 @@ export class UsersService {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
 
-      await this.usersRepository
-        .createQueryBuilder('user')
-        .update(User)
-        .set({ isActive: false })
-        .execute();
-      return { deleted: true };
+      return { deleted: true, id };
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('Failed to delete user');

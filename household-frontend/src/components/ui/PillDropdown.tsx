@@ -19,10 +19,11 @@ export const PillDropdown = ({ value, onChange, options, placeholder, buttonClas
   const [open, setOpen] = useState(false);
   const selected = options.find((o) => o.value === value);
   const displayLabel = selected?.label || placeholder || 'Chọn';
+  const wantsFullWidth = !!buttonClassName && buttonClassName.includes('w-full');
 
   return (
     <div
-      className="relative inline-block text-left"
+      className={wantsFullWidth ? 'relative w-full text-left' : 'relative inline-block text-left'}
       tabIndex={0}
       onBlur={() => {
         setTimeout(() => setOpen(false), 120);
@@ -50,7 +51,7 @@ export const PillDropdown = ({ value, onChange, options, placeholder, buttonClas
           className={
             menuClassName
               ? menuClassName
-              : 'pill-menu absolute right-0 mt-2 w-full min-w-[220px] rounded-2xl bg-white shadow-lg shadow-slate-200 border border-slate-100 z-30'
+              : 'pill-menu absolute left-0 mt-2 w-full min-w-[220px] rounded-2xl bg-white shadow-lg shadow-slate-200 border border-slate-100 z-30'
           }
         >
           {options.map((opt) => {
@@ -59,7 +60,7 @@ export const PillDropdown = ({ value, onChange, options, placeholder, buttonClas
               <button
                 key={opt.value}
                 type="button"
-                className={`pill-menu-item w-full flex flex-col items-start px-3 py-2 text-left cursor-pointer transition-colors ${
+                className={`pill-menu-item w-full flex flex-col items-start px-4 py-2 text-left cursor-pointer transition-colors ${
                   isActive ? 'bg-slate-50 pill-menu-item--active' : 'hover:bg-slate-50'
                 }`}
                 onMouseDown={(e) => {

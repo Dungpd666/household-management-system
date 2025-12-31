@@ -6,8 +6,6 @@ import {
   Delete,
   Body,
   Param,
-  UsePipes,
-  ValidationPipe,
   Request,
 } from '@nestjs/common';
 import { PopulationEventService } from './population-event.service';
@@ -18,7 +16,6 @@ import { RoleEnum } from 'src/roles/roles.enum';
 import { UseGuards } from '@nestjs/common';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { PassportJwtGuard } from 'src/auth/guard/passport-jwt.guard';
-import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/users/users.entity';
 
 @Roles(RoleEnum.admin, RoleEnum.superadmin)

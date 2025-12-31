@@ -19,13 +19,13 @@ import { UseGuards } from '@nestjs/common';
 import { Roles } from 'src/roles/roles.decorator';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { RoleEnum } from 'src/roles/roles.enum';
+import { PassportJwtGuard } from '../auth/guard/passport-jwt.guard';
 
+@UseGuards(PassportJwtGuard)
 @Controller('contribution')
 export class ContributionController {
   constructor(private readonly contributionService: ContributionService) {}
 
-  // Tạm thời chưa có xác thực và phân quyền
-  // Tạo khoản đóng góp: admin/superadmin
   @Roles(RoleEnum.admin, RoleEnum.superadmin)
   @UseGuards(AuthGuard, RolesGuard)
   @Post()
@@ -73,8 +73,6 @@ export class ContributionController {
   }
 
   // Lấy dữ liệu thống kê: admin/superadmin
-  @Roles(RoleEnum.admin, RoleEnum.superadmin)
-  @UseGuards(AuthGuard, RolesGuard)
   @Get('stats')
   getStatistics() {
     return this.contributionService.getStatistics();
@@ -115,3 +113,4 @@ export class ContributionController {
     return this.contributionService.markPaid(id, dto);
   }
 }
+

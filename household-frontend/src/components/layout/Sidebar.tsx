@@ -37,16 +37,16 @@ const Icon = ({ name }: { name: 'home' | 'household' | 'person' | 'donate' | 'us
 };
 
 export const Sidebar = () => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const displayName = user?.userName || 'Admin';
+  const displayName = isAuthenticated ? (user?.userName || 'Người dùng') : 'Khách';
   const initials = displayName
     .split(' ')
     .map((p) => p[0])
     .join('')
     .slice(0, 2)
     .toUpperCase();
-  const roleLabel = user?.userRole || 'admin';
+  const roleLabel = isAuthenticated ? (user?.userRole || 'USER') : 'GUEST';
 
   return (
     <aside className="w-full h-full flex flex-col bg-transparent text-white">
@@ -80,6 +80,9 @@ export const Sidebar = () => {
         />
         <NavLink to="/contributions" className={({ isActive }) => navItemClass({ isActive })}>
           <Icon name="donate" /> <span>Đóng góp</span>
+        </NavLink>
+        <NavLink to="/population-events" className={({ isActive }) => navItemClass({ isActive })}>
+          <Icon name="person" /> <span>Sự kiện dân số</span>
         </NavLink>
       </nav>
 

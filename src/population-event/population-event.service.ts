@@ -180,3 +180,4 @@ export class PopulationEventService {
     return { message: 'Population event removed successfully', deleted: true };
   }
 }
+

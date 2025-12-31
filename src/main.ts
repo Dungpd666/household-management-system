@@ -15,7 +15,15 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>('app.port') || 3000;
 
+  // Enable CORS so the Vite frontend (localhost:5173) can call this API
+  app.enableCors({
+    origin: ['http://localhost:5173'],
+  });
+
   await app.listen(port);
   console.log(`🚀 Server running on http://localhost:${port}`);
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('Failed to start application:', err);
+  process.exit(1);
+});

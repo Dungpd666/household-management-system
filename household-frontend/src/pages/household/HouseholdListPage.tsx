@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useHousehold } from '../../hooks/useHousehold';
+import { useToast } from '../../hooks/useToast';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { Card } from '../../components/ui/Card';
@@ -22,19 +23,23 @@ interface HouseholdFormData {
 
 export const HouseholdListPage = () => {
   const { households, loading, error, fetchHouseholds, createHousehold, updateHousehold, deleteHousehold } = useHousehold();
+  const toast = useToast();
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<HouseholdFormData>({
     householdCode: '', address: '', ward: '', district: '', city: '', householdType: ''
   });
-  const [formError, setFormError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
   const [editingHousehold, setEditingHousehold] = useState<any | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'permanent' | 'temporary' | 'moved'>('all');
 
   useEffect(() => {
     fetchHouseholds();
   }, []);
+
+  useEffect(() => {
+    if (error) toast.error(error);
+  }, [error, toast]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -42,16 +47,15 @@ export const HouseholdListPage = () => {
   };
 
   const submitCreate = async () => {
-    setFormError('');
-    setSuccessMsg('');
+    // errors handled via toast
     try {
       await createHousehold(formData);
-      setSuccessMsg('Tạo hộ gia đình thành công!');
+      toast.success('Tạo hộ gia đình thành công!');
       setShowForm(false);
       setFormData({ householdCode: '', address: '', ward: '', district: '', city: '', householdType: '' });
       fetchHouseholds();
     } catch (err: any) {
-      setFormError(err?.message || 'Lỗi khi tạo hộ gia đình');
+      toast.error(err?.message || 'Lỗi khi tạo hộ gia đình');
     }
   };
 
@@ -66,37 +70,46 @@ export const HouseholdListPage = () => {
 
   const submitEdit = async () => {
     if (!editingHousehold) return;
-    setFormError('');
-    setSuccessMsg('');
+    // errors handled via toast
     try {
       await updateHousehold(String(editingHousehold.id), editingHousehold);
-      setSuccessMsg('Cập nhật hộ gia đình thành công!');
+      toast.success('Cập nhật hộ gia đình thành công!');
       setEditingHousehold(null);
       fetchHouseholds();
     } catch (err: any) {
-      setFormError(err?.message || 'Lỗi khi cập nhật hộ gia đình');
+      toast.error(err?.message || 'Lỗi khi cập nhật hộ gia đình');
     }
   };
 
   const removeHousehold = async (id: number) => {
     if (!confirm('Bạn có chắc muốn xóa hộ gia đình này?')) return;
-    setFormError('');
-    setSuccessMsg('');
+    // errors handled via toast
     try {
       await deleteHousehold(String(id));
-      setSuccessMsg('Xóa hộ gia đình thành công!');
       fetchHouseholds();
     } catch (err: any) {
-      setFormError(err?.message || 'Lỗi khi xóa hộ gia đình');
+      toast.error(err?.message || 'Lỗi khi xóa hộ gia đình');
     }
   };
 
+  const normalizeHouseholdTypeKey = (raw?: string | null): 'permanent' | 'temporary' | 'moved' | '' => {
+    if (!raw) return '';
+    const v = raw.toLowerCase().trim();
+
+    if (['permanent', 'thường trú', 'thuong tru'].includes(v)) return 'permanent';
+    if (['temporary', 'tạm trú', 'tam tru'].includes(v)) return 'temporary';
+    if (['moved', 'đã chuyển đi', 'da chuyen di'].includes(v)) return 'moved';
+
+    return '';
+  };
+
   const totalHouseholds = households.length;
-  const approvedHouseholds = Math.max(0, Math.floor(totalHouseholds / 2));
-  const pendingHouseholds = totalHouseholds - approvedHouseholds;
+  const permanentHouseholds = households.filter((h: any) => normalizeHouseholdTypeKey(h.householdType) === 'permanent').length;
+  const temporaryHouseholds = households.filter((h: any) => normalizeHouseholdTypeKey(h.householdType) === 'temporary').length;
+  const movedHouseholds = households.filter((h: any) => normalizeHouseholdTypeKey(h.householdType) === 'moved').length;
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
-  const filteredHouseholds = !normalizedSearch
+  const afterSearch = !normalizedSearch
     ? households
     : households.filter((h: any) => {
         const values = [
@@ -111,6 +124,12 @@ export const HouseholdListPage = () => {
           .map((v: string) => v.toLowerCase());
         return values.some((v: string) => v.includes(normalizedSearch));
       });
+
+  const filteredHouseholds = afterSearch.filter((h: any) => {
+    if (typeFilter === 'all') return true;
+    const key = normalizeHouseholdTypeKey(h.householdType);
+    return key === typeFilter;
+  });
 
   const scheduleItems = [
     {
@@ -207,9 +226,7 @@ export const HouseholdListPage = () => {
         )}
       />
 
-      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>}
-      {formError && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{formError}</div>}
-      {successMsg && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">{successMsg}</div>}
+
 
       <Modal
         isOpen={showForm || !!editingHousehold}
@@ -222,7 +239,7 @@ export const HouseholdListPage = () => {
             hint="Mã định danh hộ khẩu, ví dụ: HK123. Mỗi hộ một mã."
           >
             <input
-              className="w-full border border-border rounded px-3 py-2 text-sm"
+              className="w-full px-4 py-2 border border-slate-200 rounded-full bg-white/80 shadow-inner focus:outline-none focus:ring-2 focus:ring-brand-primary/60 focus:border-brand-primary/50"
               name="householdCode"
               value={editingHousehold ? editingHousehold.householdCode : formData.householdCode}
               onChange={(e) => editingHousehold ? setEditingHousehold({ ...editingHousehold, householdCode: e.target.value }) : handleChange(e)}
@@ -231,7 +248,7 @@ export const HouseholdListPage = () => {
           </FieldHint>
           <FieldHint
             label="Loại hộ"
-            hint="Chọn loại hộ: Thường trú, Tạm trú, Tập thể..."
+            hint="Chọn loại hộ: Thường trú, Tạm trú, Đã chuyển đi"
           >
             <PillDropdown
               value={editingHousehold ? editingHousehold.householdType : formData.householdType}
@@ -245,12 +262,10 @@ export const HouseholdListPage = () => {
               options={[
                 { value: 'Thường trú', label: 'Thường trú' },
                 { value: 'Tạm trú', label: 'Tạm trú' },
-                { value: 'Tạm vắng', label: 'Tạm vắng' },
-                { value: 'Tập thể', label: 'Tập thể' },
-                { value: 'Khác', label: 'Khác' },
+                { value: 'Đã chuyển đi', label: 'Đã chuyển đi' },
               ]}
               placeholder="Chọn loại hộ"
-              buttonClassName="w-full flex items-center justify-between gap-2 border border-border rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              buttonClassName="w-full h-10 flex items-center justify-between gap-2 border border-slate-200 rounded-full px-4 text-sm bg-white/80 shadow-inner focus:outline-none focus:ring-2 focus:ring-brand-primary/60 focus:border-brand-primary/50 cursor-pointer"
             />
           </FieldHint>
           <div className="md:col-span-2">
@@ -259,7 +274,7 @@ export const HouseholdListPage = () => {
               hint="Số nhà, đường, ngõ... ví dụ: Số 10, Ngõ 5 Trần Phú."
             >
               <input
-                className="w-full border border-border rounded px-3 py-2 text-sm"
+                className="w-full px-4 py-2 border border-slate-200 rounded-full bg-white/80 shadow-inner focus:outline-none focus:ring-2 focus:ring-brand-primary/60 focus:border-brand-primary/50"
                 name="address"
                 value={editingHousehold ? editingHousehold.address : formData.address}
                 onChange={(e) => editingHousehold ? setEditingHousehold({ ...editingHousehold, address: e.target.value }) : handleChange(e)}
@@ -272,7 +287,7 @@ export const HouseholdListPage = () => {
             hint="Tên phường hoặc xã, ví dụ: Phường 1, Xã Tân Lập."
           >
             <input
-              className="w-full border border-border rounded px-3 py-2 text-sm"
+              className="w-full px-4 py-2 border border-slate-200 rounded-full bg-white/80 shadow-inner focus:outline-none focus:ring-2 focus:ring-brand-primary/60 focus:border-brand-primary/50"
               name="ward"
               value={editingHousehold ? editingHousehold.ward : formData.ward}
               onChange={(e) => editingHousehold ? setEditingHousehold({ ...editingHousehold, ward: e.target.value }) : handleChange(e)}
@@ -284,7 +299,7 @@ export const HouseholdListPage = () => {
             hint="Tên quận hoặc huyện, ví dụ: Quận Ba Đình, Huyện Đông Anh."
           >
             <input
-              className="w-full border border-border rounded px-3 py-2 text-sm"
+              className="w-full px-4 py-2 border border-slate-200 rounded-full bg-white/80 shadow-inner focus:outline-none focus:ring-2 focus:ring-brand-primary/60 focus:border-brand-primary/50"
               name="district"
               value={editingHousehold ? editingHousehold.district : formData.district}
               onChange={(e) => editingHousehold ? setEditingHousehold({ ...editingHousehold, district: e.target.value }) : handleChange(e)}
@@ -296,7 +311,7 @@ export const HouseholdListPage = () => {
             hint="Tên tỉnh/thành phố, ví dụ: Hà Nội, TP. Hồ Chí Minh."
           >
             <input
-              className="w-full border border-border rounded px-3 py-2 text-sm"
+              className="w-full px-4 py-2 border border-slate-200 rounded-full bg-white/80 shadow-inner focus:outline-none focus:ring-2 focus:ring-brand-primary/60 focus:border-brand-primary/50"
               name="city"
               value={editingHousehold ? editingHousehold.city : formData.city}
               onChange={(e) => editingHousehold ? setEditingHousehold({ ...editingHousehold, city: e.target.value }) : handleChange(e)}
@@ -315,27 +330,54 @@ export const HouseholdListPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-surface-base" padding>
-              <div className="text-[12px] font-medium text-textc-secondary mb-1">Tổng hộ gia đình</div>
-              <div className="text-2xl font-semibold text-textc-primary">
-                <AnimatedNumber value={totalHouseholds} />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="rounded-2xl p-5 flex items-start justify-between transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg bg-blue-50">
+              <div className="min-w-0">
+                <div className="text-[12px] font-medium text-blue-700">Tổng hộ gia đình</div>
+                <div className="text-3xl font-bold mt-1 text-blue-700">
+                  <AnimatedNumber value={totalHouseholds} />
+                </div>
               </div>
-            </Card>
-            <Card className="bg-surface-base" padding>
-              <div className="text-[12px] font-medium text-textc-secondary mb-1">Đã duyệt</div>
-              <div className="text-2xl font-semibold text-textc-primary">
-                <AnimatedNumber value={approvedHouseholds} />
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-blue-100 text-blue-700 shrink-0">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M4 10l8-6 8 6v8a2 2 0 0 1-2 2h-3v-6H9v6H6a2 2 0 0 1-2-2v-8z"/></svg>
               </div>
-              <div className="mt-1 text-[11px] text-textc-faint">Tỷ lệ xử lý ~50%</div>
-            </Card>
-            <Card className="bg-surface-base" padding>
-              <div className="text-[12px] font-medium text-textc-secondary mb-1">Chờ duyệt</div>
-              <div className="text-2xl font-semibold text-amber-500">
-                <AnimatedNumber value={pendingHouseholds} />
+            </div>
+
+            <div className="rounded-2xl p-5 flex items-start justify-between transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg bg-emerald-50">
+              <div className="min-w-0">
+                <div className="text-[12px] font-medium text-emerald-700">Thường trú</div>
+                <div className="text-3xl font-bold mt-1 text-emerald-700">
+                  <AnimatedNumber value={permanentHouseholds} />
+                </div>
               </div>
-              <div className="mt-1 text-[11px] text-textc-faint">Ưu tiên xử lý trong tuần</div>
-            </Card>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-emerald-100 text-emerald-700 shrink-0">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M4 10l8-6 8 6v8a2 2 0 0 1-2 2h-3v-6H9v6H6a2 2 0 0 1-2-2v-8z"/></svg>
+              </div>
+            </div>
+
+            <div className="rounded-2xl p-5 flex items-start justify-between transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg bg-amber-50">
+              <div className="min-w-0">
+                <div className="text-[12px] font-medium text-amber-700">Tạm trú</div>
+                <div className="text-3xl font-bold mt-1 text-amber-700">
+                  <AnimatedNumber value={temporaryHouseholds} />
+                </div>
+              </div>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-amber-100 text-amber-700 shrink-0">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22a10 10 0 1 1 10-10 10.01 10.01 0 0 1-10 10zm1-10.59V7h-2v6l5.25 3.15 1-1.65z"/></svg>
+              </div>
+            </div>
+
+            <div className="rounded-2xl p-5 flex items-start justify-between transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg bg-rose-50">
+              <div className="min-w-0">
+                <div className="text-[12px] font-medium text-rose-700">Đã chuyển đi</div>
+                <div className="text-3xl font-bold mt-1 text-rose-700">
+                  <AnimatedNumber value={movedHouseholds} />
+                </div>
+              </div>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-rose-100 text-rose-700 shrink-0">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M10 9V5l-7 7 7 7v-4h4v-6zM14 19h2V5h-2z"/></svg>
+              </div>
+            </div>
           </div>
 
           <Card variant="table" padding={false} className="mt-2">
@@ -348,13 +390,13 @@ export const HouseholdListPage = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               <PillDropdown
-                value="all"
-                onChange={() => { /* TODO: implement filter logic */ }}
+                value={typeFilter}
+                onChange={(val) => setTypeFilter(val as 'all' | 'permanent' | 'temporary' | 'moved')}
                 options={[
-                  { value: 'all', label: 'Tất cả trạng thái', hint: 'tat ca · all status' },
-                  { value: 'approved', label: 'Đã duyệt', hint: 'da duyet · approved' },
-                  { value: 'pending', label: 'Chờ duyệt', hint: 'cho duyet · pending' },
-                  { value: 'rejected', label: 'Từ chối', hint: 'tu choi · rejected' },
+                  { value: 'all', label: 'Tất cả loại hộ', hint: 'tat ca · all types' },
+                  { value: 'permanent', label: 'Thường trú', hint: 'thuong tru · permanent' },
+                  { value: 'temporary', label: 'Tạm trú', hint: 'tam tru · temporary' },
+                  { value: 'moved', label: 'Đã chuyển đi', hint: 'da chuyen di · moved' },
                 ]}
               />
             </div>
@@ -399,12 +441,19 @@ export const HouseholdListPage = () => {
 
         {/* Daily schedule / assignments side column */}
         <div className="space-y-4">
-          <Card header={<span>Lịch xử lý hôm nay</span>} headerGradient>
+          <Card
+            header={(
+              <span className="inline-flex items-center px-3 py-1 rounded-full bg-brand-primary/10 text-textc-primary text-[13px] font-semibold -translate-y-0.5">
+                Lịch xử lý hôm nay
+              </span>
+            )}
+            headerGradient
+          >
             <ul className="space-y-3 text-[13px] max-h-64 overflow-y-auto pr-1">
               {scheduleItems.map((item) => (
                 <li
                   key={item.id}
-                  className="group flex items-center justify-between rounded-2xl px-3 py-2 transition-all duration-150 hover:-translate-y-0.5 hover:bg-white/70 hover:shadow-md hover:border hover:border-slate-200"
+                  className="group flex items-center justify-between rounded-2xl px-3 py-2 transition-all duration-150 hover:-translate-y-0.5 hover:bg-white/70 hover:shadow-md"
                 >
                   <div>
                     <div className="font-medium text-textc-primary">{item.title}</div>
@@ -426,12 +475,19 @@ export const HouseholdListPage = () => {
             </ul>
           </Card>
 
-          <Card header={<span>Nhiệm vụ nổi bật</span>} headerGradient>
+          <Card
+            header={(
+              <span className="inline-flex items-center px-3 py-1 rounded-full bg-brand-purpleSoft text-textc-primary text-[13px] font-semibold -translate-y-0.5">
+                Nhiệm vụ nổi bật
+              </span>
+            )}
+            headerGradient
+          >
             <div className="space-y-3 text-[13px] max-h-64 overflow-y-auto pr-1">
               {taskItems.map((item) => (
                 <div
                   key={item.id}
-                  className="group flex items-center justify-between rounded-2xl px-3 py-2 transition-all duration-150 hover:-translate-y-0.5 hover:bg-white/70 hover:shadow-md hover:border hover:border-slate-200"
+                  className="group flex items-center justify-between rounded-2xl px-3 py-2 transition-all duration-150 hover:-translate-y-0.5 hover:bg-white/70 hover:shadow-md"
                 >
                   <div>
                     <div className="font-medium text-textc-primary">{item.title}</div>

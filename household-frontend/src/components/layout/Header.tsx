@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
+import bkLogo from '../../assets/logo2.jpg';
 
 export const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -56,8 +57,10 @@ export const Header = () => {
 
   return (
     <div className="flex items-center justify-between min-h-[64px] py-1.5">
-      <div className="flex items-center gap-4 flex-1">
-        <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-brand-primary flex items-center justify-center font-bold text-white text-base shadow-sm">VN</div>
+      <div className="flex items-center gap-5 md:gap-6 flex-1">
+        <div className="h-10 md:h-12 rounded-xl overflow-hidden flex items-center justify-center shrink-0">
+          <img src={bkLogo} alt="Logo" className="h-full w-auto object-contain" />
+        </div>
         <div className="hidden sm:block flex-1 max-w-md">
           <div className="relative">
             <span className="absolute inset-y-0 left-3 flex items-center text-slate-400 pointer-events-none">

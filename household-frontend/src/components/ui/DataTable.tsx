@@ -73,11 +73,11 @@ export const Avatar = ({ name }: { name: string }) => {
 };
 
 export const StatusBadge = ({ label, tone }: { label: string; tone?: 'green' | 'yellow' | 'red' | 'gray' }) => {
-  const base = 'inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border';
+  const base = 'status-badge inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border';
   const map: Record<string, string> = {
-    green: 'bg-brand-primary/10 text-emerald-700 border-emerald-200',
+    green: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     yellow: 'bg-amber-50 text-amber-700 border-amber-200',
-    red: 'bg-brand-red/10 text-rose-600 border-rose-200',
+    red: 'bg-rose-50 text-rose-600 border-rose-200',
     gray: 'bg-surface-muted text-textc-secondary border-border',
   };
   return <span className={`${base} ${map[tone || 'gray']}`}>{label}</span>;

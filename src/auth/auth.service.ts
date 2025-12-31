@@ -34,7 +34,7 @@ export class AuthService {
   async authentication(input: AuthInput) {
     const userData = await this.validateUser(input);
     if (!userData) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Tên đăng nhập hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.');
     }
     return this.signIn(userData);
   }
