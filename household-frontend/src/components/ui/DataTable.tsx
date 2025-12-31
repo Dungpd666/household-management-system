@@ -17,10 +17,10 @@ interface DataTableProps<T> {
 
 export function DataTable<T>({ columns, data, rowKey, emptyText = 'Không có dữ liệu' }: DataTableProps<T>) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-border bg-white">
+    <div className="scrollable-table overflow-x-auto overflow-y-auto max-h-96 rounded-2xl border border-slate-200 bg-white">
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left border-b border-border bg-surface-subtle/60">
+          <tr className="text-left border-b border-slate-200 bg-surface-subtle/60">
             {columns.map((col) => (
               <th
                 key={col.key}
@@ -43,7 +43,7 @@ export function DataTable<T>({ columns, data, rowKey, emptyText = 'Không có d�
           {data.map((row, idx) => (
             <tr
               key={rowKey ? rowKey(row) : idx}
-              className={`border-b border-border last:border-0 transition-colors bg-white hover:bg-surface-muted`}
+              className="border-b border-slate-100 last:border-0 transition-colors bg-white hover:bg-surface-muted"
             >
               {columns.map((col) => (
                 <td key={col.key} className={`px-4 py-3 ${col.className || ''}`}>
@@ -73,11 +73,11 @@ export const Avatar = ({ name }: { name: string }) => {
 };
 
 export const StatusBadge = ({ label, tone }: { label: string; tone?: 'green' | 'yellow' | 'red' | 'gray' }) => {
-  const base = 'inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border';
+  const base = 'status-badge inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border';
   const map: Record<string, string> = {
-    green: 'bg-brand-primary/10 text-emerald-700 border-emerald-200',
+    green: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     yellow: 'bg-amber-50 text-amber-700 border-amber-200',
-    red: 'bg-brand-red/10 text-rose-600 border-rose-200',
+    red: 'bg-rose-50 text-rose-600 border-rose-200',
     gray: 'bg-surface-muted text-textc-secondary border-border',
   };
   return <span className={`${base} ${map[tone || 'gray']}`}>{label}</span>;

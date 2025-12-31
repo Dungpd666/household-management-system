@@ -1,10 +1,10 @@
-import { createContext, useState, useCallback } from 'react';
+import { createContext, useState, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { authApi, type LoginRequest, type LoginResponse } from '../api/authApi';
+import { authApi, type LoginRequest, type LoginResponse, type AuthUser } from '../api/authApi';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: LoginResponse['user'] | null;
+  user: AuthUser | null;
   loading: boolean;
   error: string | null;
   login: (credentials: LoginRequest) => Promise<void>;
@@ -19,20 +19,41 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
-  const [user, setUser] = useState<LoginResponse['user'] | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!localStorage.getItem('token'));
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Khôi phục thông tin user từ localStorage khi reload trang
+  useEffect(() => {
+    const stored = localStorage.getItem('authUser');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as AuthUser;
+        setUser(parsed);
+      } catch {
+        localStorage.removeItem('authUser');
+      }
+    }
+  }, []);
 
   const login = useCallback(async (credentials: LoginRequest) => {
     setLoading(true);
     setError(null);
     try {
       const response = await authApi.login(credentials);
-      const { access_token, user: userData } = response.data;
-      localStorage.setItem('token', access_token);
+      const data: LoginResponse = response.data;
+
+      localStorage.setItem('token', data.accessToken);
+      const authUser: AuthUser = {
+        userID: data.userID,
+        userRole: data.userRole,
+        userName: data.userName,
+      };
+      localStorage.setItem('authUser', JSON.stringify(authUser));
+
       setIsAuthenticated(true);
-      setUser(userData);
+      setUser(authUser);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed';
       setError(message);

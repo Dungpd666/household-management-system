@@ -12,8 +12,8 @@ export const contributionApi = {
     return axiosClient.get(`/contribution/${id}`);
   },
 
-  // Create contribution (expects: { type, amount, dueDate?, householdIds: number[] })
-  create: (data: { type: string; amount: number; dueDate?: string; householdIds: number[] }) => {
+  // Create contribution (backend expects a single householdId)
+  create: (data: { type: string; amount: number; dueDate?: string; householdId: number }) => {
     return axiosClient.post('/contribution', data);
   },
 
@@ -27,8 +27,10 @@ export const contributionApi = {
     return axiosClient.put(`/contribution/${id}/pay`, data);
   },
 
-  // Delete contribution (not supported by backend currently)
-  delete: (_id: string) => {
-    throw new Error('Delete contribution is not supported');
+  // Delete contribution
+  delete: (id: string) => {
+    return axiosClient.post(`/contribution/${id}/delete`);
   },
 };
+
+export default contributionApi;

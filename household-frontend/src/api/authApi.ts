@@ -1,37 +1,32 @@
 import axiosClient from './axiosClient';
 
 export interface LoginRequest {
-  email: string;
+  username: string;
   password: string;
 }
 
-export interface LoginResponse {
-  access_token: string;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-  };
+export interface AuthUser {
+  userID: number;
+  userRole: string;
+  userName: string;
+}
+
+export interface LoginResponse extends AuthUser {
+  accessToken: string;
 }
 
 export const authApi = {
-  // Login
   login: (data: LoginRequest) => {
-    return axiosClient.post('/auth/login', data);
+    return axiosClient.post<LoginResponse>('/auth/login', data);
   },
 
-  // Register
-  register: (data: LoginRequest & { name: string }) => {
-    return axiosClient.post('/auth/register', data);
+  // (Tùy chọn) Lấy thông tin user từ token - hiện chỉ dùng cho superadmin
+  getInfo: () => {
+    return axiosClient.get<AuthUser>('/auth/info');
   },
 
-  // Get current user
-  getMe: () => {
-    return axiosClient.get('/auth/me');
-  },
-
-  // Logout
   logout: () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('authUser');
   },
 };

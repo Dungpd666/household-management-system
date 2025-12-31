@@ -1,5 +1,6 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { SidebarSection } from './SidebarSection';
+import { useAuth } from '../../hooks/useAuth';
 
 // Navy sidebar styling: subtle translucent active pill, white text
 const navItemClass = ({ isActive }: { isActive?: boolean }) =>
@@ -36,6 +37,17 @@ const Icon = ({ name }: { name: 'home' | 'household' | 'person' | 'donate' | 'us
 };
 
 export const Sidebar = () => {
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const displayName = isAuthenticated ? (user?.userName || 'Người dùng') : 'Khách';
+  const initials = displayName
+    .split(' ')
+    .map((p) => p[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+  const roleLabel = isAuthenticated ? (user?.userRole || 'USER') : 'GUEST';
+
   return (
     <aside className="w-full h-full flex flex-col bg-transparent text-white">
       <div className="px-5 py-4 flex items-center gap-3">
@@ -45,7 +57,7 @@ export const Sidebar = () => {
           <div className="text-[11px] tracking-wide opacity-70 uppercase">Hệ thống</div>
         </div>
       </div>
-      <nav className="px-4 py-2 flex-1 overflow-y-auto">
+      <nav className="px-4 py-2 overflow-y-auto">
         <NavLink to="/" className={({ isActive }) => navItemClass({ isActive })} end>
           <Icon name="home" /> <span>Tổng quan</span>
         </NavLink>
@@ -69,15 +81,29 @@ export const Sidebar = () => {
         <NavLink to="/contributions" className={({ isActive }) => navItemClass({ isActive })}>
           <Icon name="donate" /> <span>Đóng góp</span>
         </NavLink>
-        <div className="mt-6 mb-2 text-[11px] font-semibold opacity-60 text-white/60 uppercase">Khác</div>
-        <NavLink to="/reports" className={({ isActive }) => navItemClass({ isActive })}>
-          <Icon name="users" /> <span>Báo cáo</span>
-        </NavLink>
-        <NavLink to="/settings" className={({ isActive }) => navItemClass({ isActive })}>
-          <Icon name="users" /> <span>Cài đặt</span>
+        <NavLink to="/population-events" className={({ isActive }) => navItemClass({ isActive })}>
+          <Icon name="person" /> <span>Sự kiện dân số</span>
         </NavLink>
       </nav>
-      <div className="mt-auto px-5 py-4 text-[11px] opacity-60 text-white/60">Phiên bản thử nghiệm • 2025</div>
+
+      {/* User info ngay dưới các chức năng */}
+      <div className="px-4 pb-4 pt-3 border-t border-white/10">
+        <button
+          type="button"
+          onClick={() => navigate('/me')}
+          className="w-full flex items-center gap-3 text-left rounded-xl px-2 py-2 hover:bg-white/5 transition cursor-pointer"
+        >
+          <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center text-xs font-semibold text-white shadow-sm">
+            {initials}
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-white truncate max-w-[140px]">{displayName}</span>
+            <span className="text-[11px] uppercase tracking-wide py-0.5 rounded-full bg-white/10 text-white/80 w-fit mt-0.5 pr-1.5 pl-0">
+              {roleLabel}
+            </span>
+          </div>
+        </button>
+      </div>
     </aside>
   );
 };

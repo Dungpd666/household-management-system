@@ -12,6 +12,7 @@ interface PersonContextType {
   createPerson: (data: Omit<Person, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Person>;
   updatePerson: (id: string, data: Partial<Person>) => Promise<Person>;
   deletePerson: (id: string) => Promise<void>;
+  importFromCsv: (file: File) => Promise<void>;
 }
 
 export const PersonContext = createContext<PersonContextType | undefined>(undefined);
@@ -116,6 +117,22 @@ export const PersonProvider = ({ children }: PersonProviderProps) => {
     }
   }, []);
 
+  const importFromCsv = useCallback(async (file: File) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await personApi.importCsv(file);
+      // Sau khi import xong thì load lại danh sách
+      const response = await personApi.getAll();
+      setPersons(response.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to import persons from CSV');
+      throw err instanceof Error ? err : new Error('Failed to import persons from CSV');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return (
     <PersonContext.Provider
       value={{
@@ -127,6 +144,7 @@ export const PersonProvider = ({ children }: PersonProviderProps) => {
         createPerson,
         updatePerson,
         deletePerson,
+        importFromCsv,
       }}
     >
       {children}

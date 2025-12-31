@@ -1,21 +1,31 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+  JoinColumn,
+} from 'typeorm';
 import { Household } from '../household/household.entity';
+import { PopulationEvent } from 'src/population-event/population-event.entity';
 
 @Entity('persons')
 export class Person {
-  @PrimaryGeneratedColumn({name : 'id'})
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
-  @Column({name : 'full_name'})
+  @Column({ name: 'full_name' })
   fullName: string;
 
-  @Column({name : 'date_of_birth'})
+  @Column({ name: 'date_of_birth' })
   dateOfBirth: Date;
 
-  @Column({name : 'gender'})
+  @Column({ name: 'gender' })
   gender: string;
 
-  @Column({name : 'identification_number', unique : true})
+  @Column({ name: 'identification_number', unique: true })
   identificationNumber: string; // CMND/CCCD
 
   @Column({ nullable: true, name: 'relationship_with_head' })
@@ -36,11 +46,13 @@ export class Person {
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 
-
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updatedAt: Date;
 
   @ManyToOne(() => Household, (household) => household.members)
-  @JoinColumn({name : 'household_id'})
+  @JoinColumn({ name: 'household_id' })
   household: Household;
+
+  @OneToMany(() => PopulationEvent, (populationEvent) => populationEvent.person)
+  populationEvents: PopulationEvent[];
 }

@@ -1,7 +1,7 @@
 import { createContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { Contribution } from '../types/contribution';
-import { contributionApi } from '../api/contributionApi';
+import contributionApi from '../api/contributionApi';
 
 interface ContributionContextType {
   contributions: Contribution[];
@@ -9,7 +9,10 @@ interface ContributionContextType {
   error: string | null;
   fetchContributions: () => Promise<void>;
   fetchContributionById: (id: string) => Promise<Contribution | null>;
-  createContribution: (data: { type: string; amount: number; dueDate?: string; householdIds: number[] }) => Promise<Contribution>;
+  createContribution: (data:
+    | { type: string; amount: number; dueDate?: string; householdId: number }
+    | { type: string; amount: number; dueDate?: string; householdIds: number[] }
+  ) => Promise<void>;
   updateContribution: (id: string, data: Partial<Contribution>) => Promise<Contribution>;
   markPaid: (id: string, data?: { paidAt?: string }) => Promise<Contribution>;
 }
@@ -55,13 +58,37 @@ export const ContributionProvider = ({ children }: ContributionProviderProps) =>
     }
   }, []);
 
-  const createContribution = useCallback(async (data: { type: string; amount: number; dueDate?: string; householdIds: number[] }) => {
+  const createContribution = useCallback(async (
+    data:
+      | { type: string; amount: number; dueDate?: string; householdId: number }
+      | { type: string; amount: number; dueDate?: string; householdIds: number[] },
+  ) => {
     try {
+      // Bulk create for "All" selection in UI
+      if ('householdIds' in data) {
+        const ids = (data.householdIds ?? []).filter((id) => Number.isFinite(id) && id > 0);
+        if (ids.length === 0) throw new Error('Thiếu householdId');
+
+        const created = await Promise.all(
+          ids.map((householdId) =>
+            contributionApi.create({
+              type: data.type,
+              amount: data.amount,
+              dueDate: data.dueDate,
+              householdId,
+            }),
+          ),
+        );
+
+        setContributions((prev) => [...prev, ...created.map((r) => r.data)]);
+        return;
+      }
+
       const response = await contributionApi.create(data);
       setContributions((prev) => [...prev, response.data]);
-      return response.data;
-    } catch (err) {
-      throw err instanceof Error ? err : new Error('Failed to create contribution');
+    } catch (err: any) {
+      const message = err?.message || 'Failed to create contribution';
+      throw new Error(message);
     }
   }, []);
 

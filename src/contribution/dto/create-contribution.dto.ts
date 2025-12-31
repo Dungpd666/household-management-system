@@ -5,7 +5,6 @@ import {
   IsOptional,
   IsDateString,
   IsArray,
-  ArrayNotEmpty,
 } from 'class-validator';
 
 export class CreateContributionDto {
@@ -21,8 +20,8 @@ export class CreateContributionDto {
   @IsOptional()
   dueDate: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsArray()
-  @ArrayNotEmpty()
+  @IsNumber({}, { each: true })
   householdIds: number[];
 }

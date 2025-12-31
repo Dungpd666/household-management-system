@@ -1,52 +1,85 @@
-import { Controller, Get, Param, Post, Body, Delete, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Body,
+  Delete,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { PersonService } from '../person/person.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { PassportJwtGuard } from '../auth/guard/passport-jwt.guard';
+import { Roles } from '../roles/roles.decorator';
+import { RoleEnum } from '../roles/roles.enum';
+import { RolesGuard } from '../roles/roles.guard';
 
+@UseGuards(PassportJwtGuard, RolesGuard)
 @Controller('users')
 export class UsersController {
-    constructor(private readonly usersService: UsersService, 
-                private readonly personService : PersonService
-    ) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly personService: PersonService,
+  ) {}
 
-    @Get()
-    async findAllUsers() {
-        return this.usersService.findAllUsers();
-    }
-    
-    @Post()
-    async CreateUser(@Body() dto: CreateUserDto){
-        return this.usersService.createUser(dto, dto.role);
-    }
+  @Roles(RoleEnum.superadmin)
+  @Get()
+  async findAllUsers() {
+    return this.usersService.findAllUsers();
+  }
 
-    @Get(':id')
-    async findUserById(@Param('id') id : number){
-        return this.usersService.findUserById(id);
-    }
+  @Roles(RoleEnum.superadmin)
+  @Post()
+  async CreateUser(@Body() dto: CreateUserDto) {
+    return this.usersService.createUser(dto, dto.role);
+  }
 
-    @Put(':id')
-    async UpdateUser(@Body() dto: CreateUserDto, @Param('id') id : number){
-        return this.usersService.updateUser(id, dto);
-    }
-    
-    @Delete(':id')
-    async RemoveUser(@Param('id') id : number){
-        return this.usersService.removeUser(id);
-    }
+  @Roles(RoleEnum.admin, RoleEnum.superadmin)
+  @Get('population')
+  async Statistic() {
+    const age = await this.personService.ageGroup();
+    const job = await this.personService.jobGroup();
+    const gender = await this.personService.genderGroup();
+    return {
+      Age: age,
+      Job: job,
+      Gender: gender,
+    };
+  }
 
-    @Get('/population/age')
-    async AgeGroup(){
-        return this.personService.ageGroup();
-    }
+  @Roles(RoleEnum.superadmin)
+  @Get(':id')
+  async findUserById(@Param('id') id: number) {
+    return this.usersService.findUserById(id);
+  }
 
-    @Get('/population/job')
-    async JobGroup(){
-        return this.personService.jobGroup();
-    }
+  @Roles(RoleEnum.superadmin)
+  @Put(':id')
+  async UpdateUser(@Body() dto: UpdateUserDto, @Param('id') id: number) {
+    return this.usersService.updateUser(id, dto);
+  }
 
-    @Get('/population/gender')
-    async genderGroup(){
-        return this.personService.genderGroup();
-    }
+  @Roles(RoleEnum.superadmin)
+  @Delete(':id')
+  async RemoveUser(@Param('id') id: number) {
+    return this.usersService.removeUser(id);
+  }
 
+  @Get('/population/age')
+  async AgeGroup() {
+    return this.personService.ageGroup();
+  }
+
+  @Get('/population/job')
+  async JobGroup() {
+    return this.personService.jobGroup();
+  }
+
+  @Get('/population/gender')
+  async genderGroup() {
+    return this.personService.genderGroup();
+  }
 }

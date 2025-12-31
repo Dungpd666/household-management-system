@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import { useUsers } from '../../hooks/useUsers';
+import { useAuth } from '../../hooks/useAuth';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { Card } from '../../components/ui/Card';
 import { DataTable, Column } from '../../components/ui/DataTable';
 
 export const UsersListPage = () => {
+  const { user } = useAuth();
   const { users, loading, error, fetchUsers } = useUsers();
 
   useEffect(() => {
@@ -13,6 +15,18 @@ export const UsersListPage = () => {
 
   if (loading) return <div>Đang tải...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
+
+  if (user?.userRole !== 'superadmin') {
+    return (
+      <div className="space-y-4">
+        <PageHeader
+          title="Tài khoản hệ thống"
+          subtitle="Chỉ tài khoản Superadmin mới có quyền quản lý người dùng."
+        />
+        <Card padding className="text-sm text-red-500">Bạn không có quyền truy cập trang này.</Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

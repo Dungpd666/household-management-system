@@ -1,4 +1,11 @@
-import { IsString, IsDateString, IsOptional, IsBoolean, IsNumberString, Length } from 'class-validator';
+import {
+  IsString,
+  IsDateString,
+  IsOptional,
+  IsBoolean,
+  IsNumberString,
+  Length,
+} from 'class-validator';
 
 export class CreatePersonDto {
   @IsString()
@@ -11,7 +18,7 @@ export class CreatePersonDto {
   gender: string;
 
   @IsNumberString()
-  @Length(9,12)
+  @Length(9, 12)
   identificationNumber: string; // CMND/CCCD
 
   @IsOptional()

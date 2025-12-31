@@ -26,4 +26,13 @@ export const personApi = {
   delete: (id: string) => {
     return axiosClient.delete(`/person/${id}`);
   },
+
+  // Import persons from CSV file
+  importCsv: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return axiosClient.post('/person/upload-csv', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
 };

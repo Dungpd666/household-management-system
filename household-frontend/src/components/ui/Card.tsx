@@ -9,7 +9,7 @@ interface CardProps {
   elevated?: boolean;
   headerGradient?: boolean;
   variant?: 'default' | 'subtle' | 'muted' | 'navy' | 'table';
-  rounded?: 'xl' | 'lg' | 'md' | 'sm' | 'none' | 'top-none' | 'bottom-none';
+  rounded?: '2xl' | 'xl' | 'lg' | 'md' | 'sm' | 'none' | 'top-none' | 'bottom-none';
 }
 
 export const Card = ({ children, className = '', header, footer, padding = true, elevated = true, headerGradient, variant = 'default', rounded = 'xl' }: CardProps) => {
@@ -20,13 +20,14 @@ export const Card = ({ children, className = '', header, footer, padding = true,
       : variant === 'navy'
         ? 'bg-[#111827] text-white'
         : variant === 'table'
-          ? 'bg-white border border-[#E5E7EB]'
+          ? 'bg-white border border-slate-200'
         : 'bg-white';
-  const shadow = elevated ? 'shadow-card' : '';
+  const shadow = elevated && variant !== 'table' ? 'shadow-card' : '';
   const roundedCls =
     rounded === 'none' ? 'rounded-none'
     : rounded === 'top-none' ? 'rounded-b-xl rounded-t-none'
     : rounded === 'bottom-none' ? 'rounded-t-xl rounded-b-none'
+    : rounded === '2xl' ? 'rounded-2xl'
     : rounded === 'lg' ? 'rounded-lg'
     : rounded === 'md' ? 'rounded-md'
     : rounded === 'sm' ? 'rounded-sm'
