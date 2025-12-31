@@ -64,28 +64,22 @@ export const ContributionProvider = ({ children }: ContributionProviderProps) =>
       | { type: string; amount: number; dueDate?: string; householdIds: number[] },
   ) => {
     try {
-      // Bulk create for "All" selection in UI
-      if ('householdIds' in data) {
-        const ids = (data.householdIds ?? []).filter((id) => Number.isFinite(id) && id > 0);
-        if (ids.length === 0) throw new Error('Thiếu householdId');
+      const householdIds =
+        'householdIds' in data
+          ? (data.householdIds ?? []).filter((id) => Number.isFinite(id) && id > 0)
+          : [data.householdId].filter((id) => Number.isFinite(id) && id > 0);
 
-        const created = await Promise.all(
-          ids.map((householdId) =>
-            contributionApi.create({
-              type: data.type,
-              amount: data.amount,
-              dueDate: data.dueDate,
-              householdId,
-            }),
-          ),
-        );
+      if (householdIds.length === 0) throw new Error('Thiếu householdId');
 
-        setContributions((prev) => [...prev, ...created.map((r) => r.data)]);
-        return;
-      }
+      const response = await contributionApi.create({
+        type: data.type,
+        amount: data.amount,
+        dueDate: data.dueDate,
+        householdIds,
+      });
 
-      const response = await contributionApi.create(data);
-      setContributions((prev) => [...prev, response.data]);
+      const created = Array.isArray(response.data) ? response.data : [response.data];
+      setContributions((prev) => [...prev, ...created]);
     } catch (err: any) {
       const message = err?.message || 'Failed to create contribution';
       throw new Error(message);
