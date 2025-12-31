@@ -46,7 +46,6 @@ export const ProfilePage = () => {
         <div className="flex items-center gap-6">
           <div className="w-20 h-20 rounded-full bg-slate-200 flex items-center justify-center text-lg font-semibold text-slate-600 overflow-hidden">
             {avatarPreview ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img src={avatarPreview} alt="Avatar preview" className="w-full h-full object-cover" />
             ) : (
               <span>{displayName.charAt(0).toUpperCase()}</span>

@@ -12,9 +12,21 @@ export const contributionApi = {
     return axiosClient.get(`/contribution/${id}`);
   },
 
-  // Create contribution (backend expects a single householdId)
-  create: (data: { type: string; amount: number; dueDate?: string; householdId: number }) => {
-    return axiosClient.post('/contribution', data);
+  // Create contribution (backend expects householdIds: number[])
+  create: (
+    data:
+      | { type: string; amount: number; dueDate?: string; householdId: number }
+      | { type: string; amount: number; dueDate?: string; householdIds: number[] },
+  ) => {
+    const payload =
+      'householdIds' in data
+        ? { ...data, householdIds: data.householdIds }
+        : { ...data, householdIds: [data.householdId] };
+
+    // ensure we don't send householdId to backend DTO
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { householdId, ...rest } = payload as any;
+    return axiosClient.post('/contribution', rest);
   },
 
   // Update contribution (backend uses PUT)

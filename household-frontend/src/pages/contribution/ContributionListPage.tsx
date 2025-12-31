@@ -95,11 +95,7 @@ export const ContributionListPage = () => {
         dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : undefined,
       };
 
-      const dto = householdIds.length === 1
-        ? { ...base, householdId: householdIds[0] }
-        : { ...base, householdIds };
-
-      await createContribution(dto);
+      await createContribution({ ...base, householdIds });
       toast.success('Tạo khoản đóng góp thành công!');
       setShowForm(false);
       setFormData({ type: '', amount: 0, dueDate: '', householdId: '' });
