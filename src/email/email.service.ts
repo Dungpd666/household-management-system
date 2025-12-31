@@ -31,7 +31,7 @@ export class EmailService {
       subject: 'Thông tin đăng nhập Hệ thống Quản lý Hộ Khẩu',
       html: `
         <!DOCTYPE html>
-        <html>
+        <html lang="">
         <head>
           <meta charset="utf-8">
           <style>

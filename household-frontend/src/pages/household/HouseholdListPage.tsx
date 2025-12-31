@@ -23,9 +23,8 @@ interface HouseholdFormData {
 }
 
 export const HouseholdListPage = () => {
-  const { households, loading, error, fetchHouseholds, createHousehold, updateHousehold, deleteHousehold } = useHousehold();
+  const { households, error, fetchHouseholds, createHousehold, updateHousehold, deleteHousehold } = useHousehold();
   const toast = useToast();
-  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<HouseholdFormData>({
     householdCode: '', address: '', ward: '', district: '', city: '', householdType: '', ownerEmail: ''
@@ -66,10 +65,6 @@ export const HouseholdListPage = () => {
   const startEdit = (hh: any) => {
     setEditingHousehold(hh);
     setShowForm(false);
-  };
-
-  const cancelEdit = () => {
-    setEditingHousehold(null);
   };
 
   const submitEdit = async () => {

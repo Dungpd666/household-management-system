@@ -21,7 +21,6 @@ import { UseGuards } from '@nestjs/common';
 import { Roles } from 'src/roles/roles.decorator';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { RoleEnum } from 'src/roles/roles.enum';
-import { PassportJwtGuard } from '../auth/guard/passport-jwt.guard';
 
 @Controller('contribution')
 export class ContributionController {
