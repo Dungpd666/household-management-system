@@ -15,6 +15,8 @@ import { RolesModule } from './roles/roles.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PopulationEventModule } from './population-event/population-event.module';
+// import { ChatbotModule } from './chatbot/chatbot.module';
+import { ChatbotApiModule } from './chatbot_api/chatbot_api.module';
 
 @Module({
   controllers: [AppController, UsersController],
@@ -43,6 +45,8 @@ import { PopulationEventModule } from './population-event/population-event.modul
     PopulationEventModule,
     AuthModule,
     RolesModule,
+    // ChatbotModule,
+    ChatbotApiModule,
   ],
 })
 export class AppModule {}
