@@ -50,7 +50,7 @@ export const HouseholdSizeDistributionCard = ({ data }: { data: HouseholdSizeDis
               dataKey="value"
               name="Số hộ"
               fill="currentColor"
-              className="text-emerald-400"
+              className="text-emerald-600"
               radius={[12, 12, 12, 12]}
               isAnimationActive
             />

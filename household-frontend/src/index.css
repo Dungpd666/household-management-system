@@ -3,9 +3,26 @@
 /* Basic resets */
 html,body { margin:0; padding:0; height:100%; }
 body {
-	font-family: Inter, system-ui, sans-serif;
+	font-family: "Noto Sans", Inter, system-ui, sans-serif;
 	background: radial-gradient(circle at top left,#F4F3FF 0,#F9FAFB 45%,#FDF2FF 100%);
 	color:#111827;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent Vietnamese diacritics from looking clipped/odd in form controls */
+input,
+textarea,
+select,
+button {
+	font-family: inherit;
+}
+
+input,
+textarea,
+select {
+	line-height: 1.5;
 }
 .app-shell {
 	background-color: #F7F8FA;
@@ -58,6 +75,84 @@ body {
 	100% {
 		opacity: 0;
 		transform: translateY(8px) scale(0.97);
+	}
+}
+
+/* Chatbot micro-interactions (GPU-friendly: transform + opacity only) */
+.chat-idle {
+	animation: chat-idle-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes chat-idle-pulse {
+	0%, 100% {
+		transform: translateZ(0) scale(1);
+		filter: drop-shadow(0 10px 18px rgba(15,23,42,0.12));
+	}
+	50% {
+		transform: translateZ(0) scale(1.04);
+		filter: drop-shadow(0 14px 26px rgba(99,102,241,0.20));
+	}
+}
+
+.chat-pop {
+	animation: chat-pop-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.chat-pop-out {
+	animation: chat-pop-out 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes chat-pop-in {
+	0% {
+		opacity: 0;
+		transform: translate3d(0, 20px, 0) scale(0.7);
+	}
+	100% {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+}
+
+@keyframes chat-pop-out {
+	0% {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+	100% {
+		opacity: 0;
+		transform: translate3d(0, 20px, 0) scale(0.72);
+	}
+}
+
+.chat-btn-press {
+	transform: translateZ(0) scale(0.9);
+}
+
+.chat-btn-bounce {
+	animation: chat-btn-bounce 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes chat-btn-bounce {
+	0% {
+		transform: translateZ(0) scale(1);
+	}
+	45% {
+		transform: translateZ(0) scale(1.06);
+	}
+	100% {
+		transform: translateZ(0) scale(1);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.chat-idle,
+	.chat-pop,
+	.chat-pop-out,
+	.chat-btn-bounce {
+		animation: none !important;
+	}
+	.chat-btn-press {
+		transform: none !important;
 	}
 }
 
@@ -178,6 +273,33 @@ body.theme-dark .pill-menu-item {
 body.theme-dark .pill-menu-item:hover,
 body.theme-dark .pill-menu-item--active {
 	background-color:rgba(15,23,42,0.92);
+}
+
+/* Restore previous dark-mode button feel (no lift/shadow) */
+body.theme-dark .hms-btn,
+body.theme-dark .hms-btn:hover {
+	transform: none !important;
+	box-shadow: none !important;
+}
+
+/* Fix light-looking buttons in dark mode (e.g. "Thêm thành viên") */
+body.theme-dark .hms-btn[data-variant="gray"] {
+	background-color: rgba(255, 255, 255, 0.08) !important;
+	border-color: rgba(255, 255, 255, 0.12) !important;
+	color: #E5E7EB !important;
+}
+
+body.theme-dark .hms-btn[data-variant="gray"]:hover {
+	background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+body.theme-dark .hms-btn[data-variant="subtle"] {
+	background-color: rgba(255, 255, 255, 0.08) !important;
+	color: #E5E7EB !important;
+}
+
+body.theme-dark .hms-btn[data-variant="subtle"]:hover {
+	background-color: rgba(255, 255, 255, 0.12) !important;
 }
 
 body.theme-dark .shadow-inner {

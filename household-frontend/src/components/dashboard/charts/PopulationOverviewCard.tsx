@@ -9,9 +9,9 @@ const formatPercent = (value: number) => `${Math.round(value * 100)}%`;
 export const PopulationOverviewCard = ({ data }: { data: PopulationOverviewData }) => {
   const donutData = useMemo(
     () => [
-      { key: 'permanent', name: 'Thường trú', value: data.byStatus.permanent, className: 'text-teal-500' },
-      { key: 'temporary', name: 'Tạm trú', value: data.byStatus.temporary, className: 'text-emerald-400' },
-      { key: 'absent', name: 'Tạm vắng', value: data.byStatus.absent, className: 'text-slate-300' },
+      { key: 'permanent', name: 'Thường trú', value: data.byStatus.permanent, className: 'text-blue-700' },
+      { key: 'temporary', name: 'Tạm trú', value: data.byStatus.temporary, className: 'text-emerald-600' },
+      { key: 'absent', name: 'Tạm vắng', value: data.byStatus.absent, className: 'text-amber-500' },
     ],
     [data.byStatus],
   );

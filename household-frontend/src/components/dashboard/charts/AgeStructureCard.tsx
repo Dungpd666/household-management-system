@@ -58,7 +58,7 @@ export const AgeStructureCard = ({ data }: { data: AgeStructureData }) => {
               name="Nam"
               stackId="a"
               fill="currentColor"
-              className="text-teal-500"
+              className="text-blue-700"
               radius={[10, 10, 0, 0]}
               isAnimationActive
             />
@@ -67,8 +67,8 @@ export const AgeStructureCard = ({ data }: { data: AgeStructureData }) => {
               name="Nữ"
               stackId="a"
               fill="currentColor"
-              className="text-teal-500"
-              fillOpacity={0.35}
+              className="text-purple-600"
+              fillOpacity={0.45}
               radius={[10, 10, 0, 0]}
               isAnimationActive
             />
@@ -78,11 +78,11 @@ export const AgeStructureCard = ({ data }: { data: AgeStructureData }) => {
 
       <div className="mt-3 flex items-center gap-4 text-[12px] text-textc-secondary">
         <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-teal-500" />
+          <span className="h-2.5 w-2.5 rounded-full bg-blue-700" />
           <span>Nam</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-teal-500/40" />
+          <span className="h-2.5 w-2.5 rounded-full bg-purple-600/45" />
           <span>Nữ</span>
         </div>
       </div>

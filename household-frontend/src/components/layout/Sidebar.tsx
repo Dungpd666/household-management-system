@@ -11,7 +11,7 @@ const navItemClass = ({ isActive }: { isActive?: boolean }) =>
       : 'text-white/70'
   } hover:bg-white/10 hover:text-white`;
 
-const Icon = ({ name }: { name: 'home' | 'household' | 'person' | 'donate' | 'users' }) => {
+const Icon = ({ name }: { name: 'home' | 'household' | 'person' | 'donate' }) => {
   const base = 'w-5 h-5';
   switch (name) {
     case 'home':
@@ -29,10 +29,6 @@ const Icon = ({ name }: { name: 'home' | 'household' | 'person' | 'donate' | 'us
     case 'donate':
       return (
         <svg className={base} viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5A4.49 4.49 0 0 1 6.5 4 4.93 4.93 0 0 1 12 6.09 4.93 4.93 0 0 1 17.5 4 4.49 4.49 0 0 1 22 8.5c0 3.78-3.4 6.86-8.55 11.54z"/></svg>
-      );
-    case 'users':
-      return (
-        <svg className={base} viewBox="0 0 24 24" fill="currentColor"><path d="M16 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm-8 0a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm0 2c-3.33 0-6 1.67-6 5v2h8v-2c0-2.21.9-3.67 2.33-4.58A10.44 10.44 0 0 0 8 13zm8 1c-3.87 0-6 2.13-6 5v2h12v-2c0-2.87-2.13-5-6-5z"/></svg>
       );
   }
 };

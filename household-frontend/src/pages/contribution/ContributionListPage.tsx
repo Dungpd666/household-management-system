@@ -17,7 +17,7 @@ export const ContributionListPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     type: '',
-    amount: 0,
+    amount: '',
     dueDate: '',
     householdId: '' as string | number,
   });
@@ -26,7 +26,7 @@ export const ContributionListPage = () => {
 
   const closeForm = () => {
     setShowForm(false);
-    setFormData({ type: '', amount: 0, dueDate: '', householdId: '' });
+    setFormData({ type: '', amount: '', dueDate: '', householdId: '' });
     setHouseholdQuery('');
     setHouseholdFocused(false);
   };
@@ -42,7 +42,7 @@ export const ContributionListPage = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: name === 'amount' ? Number(value) : value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const normalize = (value: string) =>
@@ -76,6 +76,11 @@ export const ContributionListPage = () => {
         throw new Error('Vui lòng chọn hộ gia đình từ gợi ý');
       }
 
+      const amountInThousands = Number(formData.amount);
+      if (!Number.isFinite(amountInThousands) || amountInThousands <= 0) {
+        throw new Error('Vui lòng nhập số tiền hợp lệ (theo nghìn), ví dụ: 35');
+      }
+
       const householdIds =
         formData.householdId === ALL_HOUSEHOLDS
           ? (Array.isArray(households)
@@ -91,14 +96,15 @@ export const ContributionListPage = () => {
 
       const base = {
         type: formData.type,
-        amount: Number(formData.amount),
+        // UI nhập theo nghìn: 35 => 35.000 VND
+        amount: Math.round(amountInThousands * 1000),
         dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : undefined,
       };
 
       await createContribution({ ...base, householdIds });
       toast.success('Tạo khoản đóng góp thành công!');
       setShowForm(false);
-      setFormData({ type: '', amount: 0, dueDate: '', householdId: '' });
+      setFormData({ type: '', amount: '', dueDate: '', householdId: '' });
       setHouseholdQuery('');
       fetchContributions();
     } catch (err: any) {
@@ -116,6 +122,12 @@ export const ContributionListPage = () => {
       toast.error(err?.message || 'Lỗi khi cập nhật thanh toán');
     }
   };
+
+  const sortedContributions = (Array.isArray(contributions) ? [...contributions] : []).sort((a: any, b: any) => {
+    const ta = a?.createdAt ? Date.parse(a.createdAt) : 0;
+    const tb = b?.createdAt ? Date.parse(b.createdAt) : 0;
+    return tb - ta;
+  });
 
   if (loading) return <div>Đang tải...</div>;
 
@@ -154,7 +166,7 @@ export const ContributionListPage = () => {
 
             <FieldHint
               label="Số tiền (VND)"
-              hint="Nhập số tiền cần thu, ví dụ: 50000"
+              hint="Nhập theo nghìn. Ví dụ: 35 => 35.000 VND"
             >
               <input
                 type="number"
@@ -162,6 +174,8 @@ export const ContributionListPage = () => {
                 value={formData.amount}
                 onChange={handleChange}
                 required
+                min={1}
+                step={1}
                 className="w-full px-4 py-2 border border-slate-200 rounded-full text-sm bg-white/80 shadow-inner focus:outline-none focus:ring-2 focus:ring-brand-primary/60 focus:border-brand-primary/50"
               />
             </FieldHint>
@@ -260,7 +274,7 @@ export const ContributionListPage = () => {
               { key: 'createdAt', header: 'Tạo lúc', render: (r) => r.createdAt ? new Date(r.createdAt).toLocaleString() : '-' },
               { key: 'actions', header: 'Thao tác', render: (r) => !r.paid && r.id ? <Button variant="green" size="sm" onClick={() => handleMarkPaid(r.id)}>Đánh dấu đã thanh toán</Button> : null },
             ]) as Column<any>[]}
-            data={contributions}
+            data={sortedContributions}
             emptyText="Chưa có khoản đóng góp nào"
             rowKey={(r) => r.id}
           />

@@ -28,13 +28,16 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
+    const root = document.documentElement;
     const body = document.body;
     if (theme === 'dark') {
+      root.classList.add('dark');
       body.classList.add('theme-dark');
     } else {
+      root.classList.remove('dark');
       body.classList.remove('theme-dark');
     }
-    document.documentElement.style.colorScheme = theme;
+    root.style.colorScheme = theme;
     window.localStorage.setItem('theme', theme);
   }, [theme]);
 

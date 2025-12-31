@@ -23,7 +23,6 @@ export const Header = () => {
     { label: 'Danh sách nhân khẩu', path: '/persons', keywords: ['nhan khau', 'nguoi dan', 'cong dan', 'person'] },
     { label: 'Ghi nhận nhân khẩu mới', path: '/persons/new', keywords: ['them nhan khau', 'dang ky nhan khau', 'tao nhan khau'] },
     { label: 'Đóng góp', path: '/contributions', keywords: ['dong gop', 'thu phi', 'quy', 'contribution'] },
-    { label: 'Người dùng', path: '/users', keywords: ['nguoi dung', 'tai khoan', 'user', 'quan tri'] },
     { label: 'Trang cá nhân', path: '/me', keywords: ['trang ca nhan', 'profile', 'tai khoan cua toi', 'me'] },
   ];
 

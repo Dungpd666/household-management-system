@@ -18,7 +18,6 @@ import { HouseholdListPage } from '../pages/household/HouseholdListPage';
 import { HouseholdDetailPage } from '../pages/household/HouseholdDetailPage';
 import { HouseholdCreatePage } from '../pages/household/HouseholdCreatePage';
 import { ContributionListPage } from '../pages/contribution/ContributionListPage';
-import { UsersListPage } from '../pages/users/UsersListPage';
 import { ProfilePage } from '../pages/profile/ProfilePage';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { HouseholdLoginPage } from '../pages/auth/HouseholdLoginPage';
@@ -55,6 +54,7 @@ import { PopulationOverviewCard } from '../components/dashboard/charts/Populatio
 import { AgeStructureCard } from '../components/dashboard/charts/AgeStructureCard';
 // Movement Flow chart intentionally not shown on Overview
 import { HouseholdSizeDistributionCard } from '../components/dashboard/charts/HouseholdSizeDistributionCard';
+import { ChatWidget } from '../components/chat/ChatWidget';
 
 const StatIcon = ({ name }: { name: 'person' | 'household' | 'donate' | 'population' }) => {
   const base = 'w-5 h-5';
@@ -702,16 +702,6 @@ export const AppRoutes = () => {
                         )}
                       />
                       
-                      {/* Users Routes (protected) - vẫn giữ cho xem danh sách chi tiết nếu cần */}
-                      <Route
-                        path="/users"
-                        element={(
-                          <ProtectedRoute>
-                            <UsersListPage />
-                          </ProtectedRoute>
-                        )}
-                      />
-
                       {/* Profile (protected) */}
                       <Route
                         path="/me"
@@ -735,6 +725,8 @@ export const AppRoutes = () => {
                               </Card>
                             </div>
                           </div>
+
+                          <ChatWidget />
                         </div>
                       )}
                     />
