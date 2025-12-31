@@ -2,6 +2,8 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -11,12 +13,15 @@ import { UpdatePersonDto } from './dto/update-person.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { DEFAULT_PAGE_SIZE } from './utils/constants';
 import { Household } from '../household/household.entity';
+import { HouseholdService } from '../household/household.service';
 
 @Injectable()
 export class PersonService {
   constructor(
     @InjectRepository(Person)
     private personRepo: Repository<Person>,
+    @Inject(forwardRef(() => HouseholdService))
+    private householdService: HouseholdService,
   ) {}
 
   async create(dto: CreatePersonDto) {
@@ -27,7 +32,31 @@ export class PersonService {
       household: householdId ? { id: householdId } : undefined,
     });
 
-    return this.personRepo.save(person);
+    const savedPerson = await this.personRepo.save(person);
+
+    // Nếu là chủ hộ và có email, generate password và gửi email
+    if (
+      savedPerson.relationshipWithHead === 'Chủ hộ' &&
+      savedPerson.email &&
+      householdId
+    ) {
+      try {
+        const generatedPassword =
+          await this.householdService.generatePasswordAndNotify(
+            householdId,
+            savedPerson.email,
+          );
+        console.log(
+          `✅ Generated password and sent email to ${savedPerson.email}`,
+        );
+        console.log(`   Password: ${generatedPassword}`);
+      } catch (error) {
+        console.error('❌ Failed to generate password and send email:', error);
+        // Không throw error để không block việc tạo person
+      }
+    }
+
+    return savedPerson;
   }
 
   async findAll(paginationDto: PaginationDto) {

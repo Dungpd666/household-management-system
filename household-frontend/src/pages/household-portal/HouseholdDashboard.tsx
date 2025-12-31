@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { householdApi } from '../../api/householdApi';
 import { useToast } from '../../hooks/useToast';
 import { Card } from '../../components/ui/Card';
@@ -11,10 +11,28 @@ import type { Contribution } from '../../types/contribution';
 export const HouseholdDashboard = () => {
   const toast = useToast();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [household, setHousehold] = useState<Household | null>(null);
   const [members, setMembers] = useState<Person[]>([]);
   const [contributions, setContributions] = useState<Contribution[]>([]);
+
+  // Check for payment result in URL params
+  useEffect(() => {
+    const paymentStatus = searchParams.get('paymentStatus');
+    const message = searchParams.get('message');
+
+    if (paymentStatus) {
+      if (paymentStatus === 'success') {
+        toast.success(message || 'Thanh toán thành công!');
+      } else {
+        toast.error(message || 'Thanh toán thất bại hoặc đã bị hủy');
+      }
+
+      // Clean up URL params
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams, toast]);
 
   useEffect(() => {
     const fetchData = async () => {

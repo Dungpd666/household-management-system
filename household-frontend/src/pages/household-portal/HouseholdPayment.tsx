@@ -43,12 +43,12 @@ export const HouseholdPayment = () => {
     if (selectedContributions.length === unpaidContributions.length) {
       setSelectedContributions([]);
     } else {
-      setSelectedContributions(unpaidContributions.map(c => c.id));
+      setSelectedContributions(unpaidContributions.map(c => c.id!).filter((id): id is number => id !== undefined));
     }
   };
 
   const totalAmount = unpaidContributions
-    .filter(c => selectedContributions.includes(c.id))
+    .filter(c => c.id && selectedContributions.includes(c.id))
     .reduce((sum, c) => sum + (c.amount || 0), 0);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -127,15 +127,15 @@ export const HouseholdPayment = () => {
                   <label
                     key={contribution.id}
                     className={`flex items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                      selectedContributions.includes(contribution.id)
+                      contribution.id && selectedContributions.includes(contribution.id)
                         ? 'border-brand-purple bg-purple-50'
                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
                     <input
                       type="checkbox"
-                      checked={selectedContributions.includes(contribution.id)}
-                      onChange={() => handleToggleContribution(contribution.id)}
+                      checked={contribution.id ? selectedContributions.includes(contribution.id) : false}
+                      onChange={() => contribution.id && handleToggleContribution(contribution.id)}
                       className="w-5 h-5 text-brand-purple rounded focus:ring-2 focus:ring-brand-purple/60"
                     />
                     <div className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl bg-amber-100">

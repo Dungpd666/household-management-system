@@ -9,7 +9,9 @@ import {
   ParseIntPipe,
   Ip,
   Req,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { ContributionService } from './contribution.service';
 import { CreateContributionDto } from './dto/create-contribution.dto';
 import { UpdateContributionDto } from './dto/update-contribution.dto';
@@ -21,7 +23,6 @@ import { RolesGuard } from 'src/roles/roles.guard';
 import { RoleEnum } from 'src/roles/roles.enum';
 import { PassportJwtGuard } from '../auth/guard/passport-jwt.guard';
 
-@UseGuards(PassportJwtGuard)
 @Controller('contribution')
 export class ContributionController {
   constructor(private readonly contributionService: ContributionService) {}
@@ -79,8 +80,15 @@ export class ContributionController {
 
   // Xử lý trả về từ VNPAY
   @Get('vnpay-return')
-  async handleVnpayReturn(@Query() query: Record<string, any>) {
-    return this.contributionService.handleVnpayReturn(query);
+  async handleVnpayReturn(@Query() query: Record<string, any>, @Res() res: Response) {
+    const result = await this.contributionService.handleVnpayReturn(query);
+
+    // Redirect to frontend household dashboard with payment result
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const status = result.success ? 'success' : 'failed';
+    const message = encodeURIComponent(result.message);
+
+    return res.redirect(`${frontendUrl}/household/dashboard?paymentStatus=${status}&message=${message}`);
   }
 
   // Xử lý IPN từ VNPAY (không cần authentication vì được gọi từ VNPAY server)

@@ -6,7 +6,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Person } from '../person/person.entity';
-import { User } from 'src/users/users.entity';
+import { User } from '../users/users.entity';
 import { PopulationEventType } from './dto/create-population-event.dto';
 
 @Entity('population_events')

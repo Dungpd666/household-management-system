@@ -9,7 +9,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Household } from '../household/household.entity';
-import { PopulationEvent } from 'src/population-event/population-event.entity';
+import { PopulationEvent } from '../population-event/population-event.entity';
 
 @Entity('persons')
 export class Person {
@@ -42,6 +42,9 @@ export class Person {
 
   @Column({ nullable: true, name: 'is_deceased' })
   isDeceased: boolean;
+
+  @Column({ nullable: true, name: 'email' })
+  email: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;

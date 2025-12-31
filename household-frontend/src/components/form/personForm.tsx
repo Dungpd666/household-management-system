@@ -26,6 +26,7 @@ export const PersonForm = ({ initialData, onSubmit, isLoading }: PersonFormProps
     educationLevel: initialData?.educationLevel || '',
     migrationStatus: initialData?.migrationStatus || '',
     isDeceased: initialData?.isDeceased || false,
+    email: initialData?.email || '',
     householdId: initialData?.household?.id || '',
   });
   const [householdQuery, setHouseholdQuery] = useState<string>(initialData?.household?.householdCode || '');
@@ -174,6 +175,23 @@ export const PersonForm = ({ initialData, onSubmit, isLoading }: PersonFormProps
           className="w-full px-4 py-2 border border-slate-200 rounded-full bg-white/80 shadow-inner focus:outline-none focus:ring-2 focus:ring-brand-primary/60 focus:border-brand-primary/50"
         />
       </div>
+
+      {formData.relationshipWithHead === 'Chủ hộ' && (
+        <FieldHint
+          label="Email"
+          hint="Email để nhận thông tin đăng nhập hộ khẩu. Bắt buộc đối với chủ hộ."
+        >
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required={formData.relationshipWithHead === 'Chủ hộ'}
+            placeholder="example@gmail.com"
+            className="w-full px-4 py-2 border border-slate-200 rounded-full bg-white/80 shadow-inner focus:outline-none focus:ring-2 focus:ring-brand-primary/60 focus:border-brand-primary/50"
+          />
+        </FieldHint>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
