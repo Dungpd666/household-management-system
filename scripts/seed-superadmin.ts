@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { config as loadEnv } from 'dotenv';
 import { User } from '../src/users/users.entity';
 import typeormConfig from '../src/config/typeorm.config';
+import * as bcrypt from 'bcrypt';
 
 loadEnv();
 
@@ -21,17 +22,30 @@ async function seedSuperAdmin() {
 
     const userRepo = dataSource.getRepository(User);
 
-    const existing = await userRepo.findOne({ where: { userName: 'superadmin' } });
+    const username = 'superadmin';
+    const plainPassword = 'superadmin123';
+    const saltRounds = 10;
+
+    const existing = await userRepo.findOne({ where: { userName: username } });
     if (existing) {
-      console.log('Superadmin already exists with username "superadmin"');
-      await dataSource.destroy();
+      const looksBcrypt = typeof existing.passWordHash === 'string' && existing.passWordHash.startsWith('$2');
+      if (!looksBcrypt) {
+        existing.passWordHash = await bcrypt.hash(plainPassword, saltRounds);
+        existing.isActive = true;
+        await userRepo.save(existing);
+        console.log('Repaired superadmin password_hash to bcrypt and reactivated account.');
+      } else {
+        console.log('Superadmin already exists with username "superadmin"');
+      }
+      console.log('  username: superadmin');
+      console.log('  password: superadmin123');
       return;
     }
 
     const admin = userRepo.create({
       fullName: 'Super Administrator',
-      userName: 'superadmin',
-      passWordHash: 'superadmin123',
+      userName: username,
+      passWordHash: await bcrypt.hash(plainPassword, saltRounds),
       email: 'superadmin@example.com',
       phone: '0900000000',
       role: 'superadmin',

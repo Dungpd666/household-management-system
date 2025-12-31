@@ -26,13 +26,13 @@ export default registerAs(
 
     autoLoadEntities: true,
 
-    // ⚠️ LƯU Ý QUAN TRỌNG VỚI DB MỚI (NEON):
-    // Vì DB trên Neon đang trống trơn, nếu bạn để synchronize: false
-    // và chưa có file migration nào trong folder, thì app sẽ chạy nhưng KHÔNG có bảng nào được tạo.
-    // Lần đầu chạy, bạn nên để true, hoặc chắc chắn rằng folder migrations đã có file.
-    synchronize: false,
+    // Mặc định KHÔNG auto-sync schema. Chỉ bật khi DEV và bạn hiểu rủi ro.
+    synchronize: process.env.DB_SYNCHRONIZE === 'true',
 
-    migrationsRun: true,
+    // Mặc định KHÔNG auto-run migrations khi khởi động.
+    // Nếu DB đã có bảng sẵn, auto-run có thể làm app crash (vd: "relation \"users\" already exists").
+    // Bật khi bạn muốn app tự chạy migrations.
+    migrationsRun: process.env.DB_MIGRATIONS_RUN === 'true',
     migrations: [join(__dirname, '../database/migrations/*{.ts,.js}')],
   }),
 );
