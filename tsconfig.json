@@ -22,15 +22,6 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
   },
-  "include": [
-    "src/**/*",
-    "test/**/*",
-    "config/**/*",
-    "scripts/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "household-frontend"
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "household-frontend"]
 }

@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
 import { Person } from '../person/person.entity';
 import { Contribution } from '../contribution/contribution.entity';
 
@@ -33,7 +34,7 @@ export class Household {
   householdType: string;
 
   @Column({ name: 'password', type: 'varchar', nullable: true })
-  password: string | null;
+  password?: string | null;
 
   @Column({ name: 'is_active', type: 'boolean', default: true })
   isActive: boolean;

@@ -23,7 +23,7 @@ export class CreatePersonDto {
 
   @IsOptional()
   @IsString()
-  relationshipWithHouseholdHead?: string;
+  relationshipWithHead?: string;
 
   @IsOptional()
   @IsString()
