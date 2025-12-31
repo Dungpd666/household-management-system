@@ -9,6 +9,7 @@ export interface Person {
   educationLevel?: string;
   migrationStatus?: string;
   isDeceased?: boolean;
+  email?: string;
   household?: { id: number; householdCode: string };
   createdAt?: Date;
   updatedAt?: Date;

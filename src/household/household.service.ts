@@ -7,6 +7,7 @@ import { Person } from '../person/person.entity';
 import { CreateHouseholdDto } from './dto/create-household.dto';
 import { UpdateHouseholdDto } from './dto/update-household.dto';
 import { SetHouseholdPasswordDto } from './dto/set-household-password.dto';
+import { EmailService } from '../email/email.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -17,6 +18,8 @@ export class HouseholdService {
 
     @InjectRepository(Person)
     private personRepo: Repository<Person>,
+
+    private emailService: EmailService,
   ) {}
 
   // Hàm tiện ích để sinh mật khẩu ngẫu nhiên
@@ -32,27 +35,61 @@ export class HouseholdService {
   }
 
   async create(data: CreateHouseholdDto) {
+    // Tạo household mà không có password
+    // Password sẽ được tạo khi thêm chủ hộ (person với relationshipWithHead = "Chủ hộ")
+    const household = this.householdRepo.create({
+      householdCode: data.householdCode,
+      address: data.address,
+      ward: data.ward,
+      district: data.district,
+      city: data.city,
+      householdType: data.householdType,
+      password: null, // Chưa có password
+      isActive: false, // Chưa active vì chưa có chủ hộ
+    });
+
+    const savedHousehold = await this.householdRepo.save(household);
+
+    return savedHousehold;
+  }
+
+  // Hàm mới: Generate password và gửi email cho chủ hộ
+  async generatePasswordAndNotify(
+    householdId: number,
+    ownerEmail: string,
+  ): Promise<string> {
+    const household = await this.householdRepo.findOne({
+      where: { id: householdId },
+    });
+
+    if (!household) {
+      throw new NotFoundException('Household not found');
+    }
+
     // 1. Sinh mật khẩu ngẫu nhiên
     const rawPassword = this.generateRandomPassword(6);
 
     // 2. Hash mật khẩu
     const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
-    // 3. Tạo đối tượng household với mật khẩu đã hash
-    const household = this.householdRepo.create({
-      ...data,
-      password: hashedPassword,
-      isActive: true,
-    });
+    // 3. Cập nhật household
+    household.password = hashedPassword;
+    household.isActive = true;
+    await this.householdRepo.save(household);
 
-    // 4. Lưu vào DB
-    const savedHousehold = await this.householdRepo.save(household);
+    // 4. Gửi email
+    try {
+      await this.emailService.sendHouseholdCredentials(
+        ownerEmail,
+        household.householdCode,
+        rawPassword,
+      );
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      // Không throw error để không block
+    }
 
-    // 5. Trả về kết quả kèm mật khẩu gốc để hiển thị cho Admin
-    return {
-      ...savedHousehold,
-      generatedPassword: rawPassword, // Trường này quan trọng để Admin cấp cho chủ hộ
-    };
+    return rawPassword;
   }
 
   async findAll() {

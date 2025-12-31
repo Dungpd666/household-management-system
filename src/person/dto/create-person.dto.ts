@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsBoolean,
   IsNumberString,
+  IsEmail,
   Length,
 } from 'class-validator';
 
@@ -40,6 +41,10 @@ export class CreatePersonDto {
   @IsOptional()
   @IsBoolean()
   isDeceased?: boolean;
+
+  @IsOptional()
+  @IsEmail()
+  email?: string;
 
   @IsOptional()
   householdId?: number; // Liên kết đến Household

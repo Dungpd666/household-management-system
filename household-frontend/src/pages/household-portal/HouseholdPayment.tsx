@@ -49,11 +49,11 @@ export const HouseholdPayment = () => {
   };
 
   const totalAmount = unpaidContributions
+<<<<<<< HEAD
     .filter(c => c.id !== undefined && selectedContributions.includes(c.id))
-    .reduce((sum, c) => sum + (c.amount || 0), 0);
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+=======
+    .filter(c => c.id && selectedContributions.includes(c.id))
+    .filter(c => c.id !== undefined && selectedContributions.includes(c.id))
 
     console.log('Selected contributions:', selectedContributions);
 
@@ -132,6 +132,10 @@ export const HouseholdPayment = () => {
                 <p className="text-sm text-slate-500 mt-2">Tất cả các khoản đóng góp đã được thanh toán</p>
               </div>
             ) : (
+<<<<<<< HEAD
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -162,10 +166,6 @@ export const HouseholdPayment = () => {
                     ))}
                   </tbody>
                 </table>
-              </div>
-            )}
-
-            {/* Summary */}
             {selectedContributions.length > 0 && (
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
                 <div className="space-y-3 text-base">

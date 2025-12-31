@@ -19,15 +19,15 @@ interface HouseholdFormData {
   district: string;
   city: string;
   householdType: string;
+  ownerEmail: string;
 }
 
 export const HouseholdListPage = () => {
-  const { households, loading, error, fetchHouseholds, createHousehold, updateHousehold, deleteHousehold } = useHousehold();
+  const { households, error, fetchHouseholds, createHousehold, updateHousehold, deleteHousehold } = useHousehold();
   const toast = useToast();
-  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<HouseholdFormData>({
-    householdCode: '', address: '', ward: '', district: '', city: '', householdType: ''
+    householdCode: '', address: '', ward: '', district: '', city: '', householdType: '', ownerEmail: ''
   });
   const [editingHousehold, setEditingHousehold] = useState<any | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -50,9 +50,12 @@ export const HouseholdListPage = () => {
     // errors handled via toast
     try {
       await createHousehold(formData);
-      toast.success('Tạo hộ gia đình thành công!');
+      const successMsg = formData.ownerEmail
+        ? 'Tạo hộ gia đình thành công! Email đã được gửi đến chủ hộ.'
+        : 'Tạo hộ gia đình thành công!';
+      toast.success(successMsg);
       setShowForm(false);
-      setFormData({ householdCode: '', address: '', ward: '', district: '', city: '', householdType: '' });
+      setFormData({ householdCode: '', address: '', ward: '', district: '', city: '', householdType: '', ownerEmail: '' });
       fetchHouseholds();
     } catch (err: any) {
       toast.error(err?.message || 'Lỗi khi tạo hộ gia đình');
@@ -62,10 +65,6 @@ export const HouseholdListPage = () => {
   const startEdit = (hh: any) => {
     setEditingHousehold(hh);
     setShowForm(false);
-  };
-
-  const cancelEdit = () => {
-    setEditingHousehold(null);
   };
 
   const submitEdit = async () => {
@@ -318,6 +317,23 @@ export const HouseholdListPage = () => {
               required
             />
           </FieldHint>
+          {!editingHousehold && (
+            <div className="md:col-span-2">
+              <FieldHint
+                label="Email chủ hộ (không bắt buộc)"
+                hint="Email để gửi thông tin đăng nhập cho chủ hộ. Ví dụ: nguyenvana@gmail.com"
+              >
+                <input
+                  type="email"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-full bg-white/80 shadow-inner focus:outline-none focus:ring-2 focus:ring-brand-primary/60 focus:border-brand-primary/50"
+                  name="ownerEmail"
+                  value={formData.ownerEmail}
+                  onChange={handleChange}
+                  placeholder="nguyenvana@gmail.com"
+                />
+              </FieldHint>
+            </div>
+          )}
         </div>
         <div className="mt-4 flex justify-end gap-2">
           {editingHousehold ? (
