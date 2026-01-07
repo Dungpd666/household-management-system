@@ -23,6 +23,18 @@ const AppDataSource = new DataSource({
   synchronize: false,
 });
 
+// Helper function to generate random amount
+function generateRandomAmount(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Helper function to generate random date
+function generateRandomDate(daysInFuture: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + Math.floor(Math.random() * daysInFuture));
+  return date.toISOString().split('T')[0];
+}
+
 async function seed() {
   try {
     await AppDataSource.initialize();
@@ -76,26 +88,36 @@ async function seed() {
       ON CONFLICT (identification_number) DO NOTHING
     `);
 
-    // Seed Contributions
+    // Seed Contributions with random amounts
     console.log('Seeding contributions...');
+    
+    const contributionTypes = ['Phí vệ sinh', 'Phí bảo vệ', 'Hỗ trợ hộ nghèo', 'Quỹ giáo dục', 'Quỹ y tế cộng đồng'];
+    let contributionValues = '';
+    
+    for (let householdId = 1; householdId <= 5; householdId++) {
+      // Generate 3-5 contributions per household with random amounts
+      const numContributions = 3 + Math.floor(Math.random() * 3);
+      
+      for (let i = 0; i < numContributions; i++) {
+        const type = contributionTypes[Math.floor(Math.random() * contributionTypes.length)];
+        const amount = generateRandomAmount(30000, 250000);
+        const dueDate = generateRandomDate(90);
+        const isPaid = Math.random() > 0.3; // 70% paid, 30% unpaid
+        const paidAt = isPaid ? generateRandomDate(30) : 'null';
+        
+        const paidAtValue = isPaid ? `'${paidAt}'` : 'null';
+        
+        contributionValues += `('${type}', ${amount}, '${dueDate}', ${isPaid}, ${paidAtValue}, ${householdId}),\n        `;
+      }
+    }
+    
+    // Remove trailing comma and newline
+    contributionValues = contributionValues.slice(0, -10);
+    
     await AppDataSource.query(`
       INSERT INTO contributions (type, amount, due_date, paid, paid_at, household_id)
       VALUES
-        ('Phí vệ sinh', 50000, '2024-01-31', true, '2024-01-15', 1),
-        ('Phí vệ sinh', 50000, '2024-02-29', true, '2024-02-10', 1),
-        ('Phí vệ sinh', 50000, '2024-03-31', false, null, 1),
-        ('Phí bảo vệ', 100000, '2024-01-31', true, '2024-01-15', 1),
-        ('Phí vệ sinh', 50000, '2024-01-31', true, '2024-01-20', 2),
-        ('Phí vệ sinh', 50000, '2024-02-29', true, '2024-02-15', 2),
-        ('Phí vệ sinh', 50000, '2024-03-31', true, '2024-03-10', 2),
-        ('Phí bảo vệ', 100000, '2024-01-31', true, '2024-01-20', 2),
-        ('Phí vệ sinh', 50000, '2024-01-31', false, null, 3),
-        ('Phí vệ sinh', 50000, '2024-02-29', false, null, 3),
-        ('Hỗ trợ hộ nghèo', 200000, '2024-01-31', true, '2024-01-25', 4),
-        ('Phí vệ sinh', 50000, '2024-01-31', true, '2024-01-18', 4),
-        ('Phí vệ sinh', 50000, '2024-01-31', true, '2024-01-22', 5),
-        ('Phí bảo vệ', 100000, '2024-01-31', true, '2024-01-22', 5),
-        ('Phí vệ sinh', 50000, '2024-02-29', false, null, 5)
+        ${contributionValues}
     `);
 
     // Seed Population Events

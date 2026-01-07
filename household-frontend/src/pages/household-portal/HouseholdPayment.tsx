@@ -49,11 +49,11 @@ export const HouseholdPayment = () => {
   };
 
   const totalAmount = unpaidContributions
-<<<<<<< HEAD
     .filter(c => c.id !== undefined && selectedContributions.includes(c.id))
-=======
-    .filter(c => c.id && selectedContributions.includes(c.id))
-    .filter(c => c.id !== undefined && selectedContributions.includes(c.id))
+    .reduce((sum, c) => sum + (c.amount || 0), 0);
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
 
     console.log('Selected contributions:', selectedContributions);
 
@@ -81,15 +81,6 @@ export const HouseholdPayment = () => {
       toast.error(err?.response?.data?.message || err?.message || 'Không thể tạo yêu cầu thanh toán');
       setLoading(false);
     }
-  };
-
-  const getContributionIcon = (type: string) => {
-    if (type.includes('Điện') || type.includes('điện')) return '⚡';
-    if (type.includes('Nước') || type.includes('nước')) return '💧';
-    if (type.includes('Vệ sinh') || type.includes('vệ sinh')) return '🧹';
-    if (type.includes('Bảo vệ') || type.includes('bảo vệ')) return '🛡️';
-    if (type.includes('từ thiện')) return '❤️';
-    return '💰';
   };
 
   return (
@@ -132,10 +123,6 @@ export const HouseholdPayment = () => {
                 <p className="text-sm text-slate-500 mt-2">Tất cả các khoản đóng góp đã được thanh toán</p>
               </div>
             ) : (
-<<<<<<< HEAD
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -166,6 +153,10 @@ export const HouseholdPayment = () => {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {/* Summary */}
             {selectedContributions.length > 0 && (
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
                 <div className="space-y-3 text-base">
